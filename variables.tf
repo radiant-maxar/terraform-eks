@@ -1,13 +1,3 @@
-variable "aws_account_id" {
-  description = "The AWS account identifier."
-  type        = string
-}
-
-variable "aws_region" {
-  description = "The AWS region."
-  type        = string
-}
-
 variable "cluster_name" {
   description = "Unique name for the EKS cluster."
   type        = string

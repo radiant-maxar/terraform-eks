@@ -1,5 +1,10 @@
+data "aws_caller_identity" "default" {}
+data "aws_region" "default" {}
+
 locals {
-  aws_auth_file = "${path.root}/aws-auth-${var.cluster_name}.yaml"
+  aws_account_id = data.aws_caller_identity.default.account_id
+  aws_region     = data.aws_region.default.name
+  aws_auth_file  = "${path.root}/aws-auth-${var.cluster_name}.yaml"
 
   # AWS Load Balancer Controller needs these additional security groups to work.
   load_balancer_security_group_rules = {
@@ -115,7 +120,7 @@ module "eks" {
 # Add EKS to default kubeconfig and set context for it.
 resource "null_resource" "eks_kubeconfig" {
   provisioner "local-exec" {
-    command = "aws --region ${var.aws_region} eks update-kubeconfig --name ${var.cluster_name} --alias ${var.cluster_name}"
+    command = "aws --region ${local.aws_region} eks update-kubeconfig --name ${var.cluster_name} --alias ${var.cluster_name}"
   }
   depends_on = [
     module.eks,
@@ -125,7 +130,7 @@ resource "null_resource" "eks_kubeconfig" {
 # Configure aws-auth to allow any addition roles for system:masters access.
 resource "local_file" "eks_aws_auth_configmap" {
   content = templatefile("${path.module}/templates/aws_auth_configmap.tpl", {
-    aws_account_id          = var.aws_account_id
+    aws_account_id          = local.aws_account_id
     aws_auth_configmap_yaml = module.eks.aws_auth_configmap_yaml
     system_masters_roles    = var.system_masters_roles
   })
@@ -296,7 +301,7 @@ provider "helm" {
       api_version = "client.authentication.k8s.io/v1alpha1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--region", var.aws_region, "--cluster-name", module.eks.cluster_id]
+      args = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_id]
     }
   }
 }
@@ -308,7 +313,7 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1alpha1"
     command     = "aws"
-    args = ["eks", "get-token", "--region", var.aws_region, "--cluster-name", module.eks.cluster_id]
+    args = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_id]
   }
 }
 
@@ -322,7 +327,7 @@ resource "kubernetes_service_account" "eks_lb_controller" {
       "app.kubernetes.io/name"      = "aws-load-balancer-controller"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn"               = "arn:aws:iam::${var.aws_account_id}:role/${var.cluster_name}-lb-role"
+      "eks.amazonaws.com/role-arn"               = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-lb-role"
       "eks.amazonaws.com/sts-regional-endpoints" = "true"
     }
   }
@@ -354,7 +359,7 @@ resource "helm_release" "aws_lb_controller" {
 
   set {
     name  = "region"
-    value = var.aws_region
+    value = local.aws_region
   }
 
   set {
@@ -408,7 +413,7 @@ resource "kubernetes_service_account" "eks_ebs_controller_sa" {
       "app.kubernetes.io/name" = "aws-ebs-csi-driver"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${var.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
     }
   }
   depends_on = [
@@ -423,7 +428,7 @@ resource "helm_release" "aws_ebs_csi_driver" {
 
   set {
     name  = "image.repository"
-    value = "${var.csi_ecr_repository_id}.dkr.ecr.${var.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
+    value = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
   }
 
   set {
@@ -478,7 +483,7 @@ resource "kubernetes_service_account" "eks_efs_controller_sa" {
       "app.kubernetes.io/name" = "aws-efs-csi-driver"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${var.aws_account_id}:role/${var.cluster_name}-efs-csi-role"
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-role"
     }
   }
   depends_on = [
@@ -494,7 +499,7 @@ resource "kubernetes_service_account" "eks_efs_node_sa" {
       "app.kubernetes.io/name" = "aws-efs-csi-driver"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${var.aws_account_id}:role/${var.cluster_name}-efs-csi-role"
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-role"
     }
   }
   depends_on = [
@@ -509,7 +514,7 @@ resource "helm_release" "aws_efs_csi_driver" {
 
   set {
     name  = "image.repository"
-    value = "${var.csi_ecr_repository_id}.dkr.ecr.${var.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
+    value = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
   }
 
   set {
