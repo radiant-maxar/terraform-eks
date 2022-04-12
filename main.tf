@@ -378,7 +378,7 @@ resource "helm_release" "aws_lb_controller" {
 # XXX: Unless this webhook is deleted, the load balancer controller won't create
 # ALBs dynamically because AWS requires use of their private CA via cert-manager:
 #   https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/v2_2_4_full.yaml#L840
-resource "null_resource" "openmaps_delete_lb_validating_webook" {
+resource "null_resource" "eks_delete_lb_validating_webook" {
   provisioner "local-exec" {
     command = "kubectl --context='${var.cluster_name}' delete ValidatingWebhookConfiguration/aws-load-balancer-webhook"
   }
