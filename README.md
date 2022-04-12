@@ -5,8 +5,16 @@ This module provides an opinionated way to configure an AWS EKS cluster using:
 * [terraform-aws-eks](https://github.com/terraform-aws-modules/terraform-aws-eks)
 * [terraform-aws-iam](https://github.com/terraform-aws-modules/terraform-aws-iam)
 
+## Features
+
+* [VPC CNI](https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html) networking, using IRSA role.
+* [EBS CSI](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html) with `gp3` devices configured as the default storage class (`ebs-sc`).
+* [EFS CSI](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html) support enabled, along with an EFS file system for creating [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html) for `ReadWriteMany` persistent volume support with the `efs-sc` storage class.
+* Overcoming integration issues and bugs Amazon hasn't documented or fixed yet using these EKS features.
 
 ## Example
+
+Here's an example using a VPC defined using the [terraform-aws-vpc](https://github.com/terraform-aws-modules/terraform-aws-vpc) module:
 
 ```
 data "aws_availability_zones" "default" {}
@@ -79,7 +87,7 @@ module "eks_vpc" {
 }
 
 module "eks" {
-  source = "github.com/jbronn/terraform-eks"
+  source = "github.com/radiant-maxar/terraform-eks"
 
   cluster_name    = local.cluster_name
   private_subnets = module.eks_vpc.private_subnets
@@ -111,3 +119,7 @@ module "eks" {
   }
 }
 ```
+
+## Known Issues
+
+Using the `kubernetes` / `helm` [providers at the same time as provisioning the EKS cluster](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources) can lead to errors about resolving the EKS cluster OIDC endpoints via DNS on the first `terraform apply`.  Running again resolves these problems.
