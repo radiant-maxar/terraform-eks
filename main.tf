@@ -582,6 +582,6 @@ resource "null_resource" "eks_nvidia_device_plugin" {
     command = "kubectl --context='${var.cluster_name}' apply --filename='https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v${var.nvidia_device_plugin_version}/nvidia-device-plugin.yml'"
   }
   depends_on = [
-    module.eks,
+    kubernetes_service_account.eks_lb_controller,
   ]
 }
