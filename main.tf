@@ -70,7 +70,7 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.20.1"
+  version = "18.20.2"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
@@ -158,7 +158,7 @@ resource "null_resource" "eks_poweruser_auth" {
 # Authorize Amazon Load Balancer Controller
 module "eks_lb_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.18.0"
+  version = "4.20.0"
 
   role_name                              = "${var.cluster_name}-lb-role"
   attach_load_balancer_controller_policy = true
@@ -176,7 +176,7 @@ module "eks_lb_irsa" {
 # Authorize VPC CNI via IRSA.
 module "eks_vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.18.0"
+  version = "4.20.0"
 
   role_name             = "${var.cluster_name}-vpc-cni-role"
   attach_vpc_cni_policy = true
@@ -195,7 +195,7 @@ module "eks_vpc_cni_irsa" {
 # Allow PVCs backed by EBS
 module "eks_ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.18.0"
+  version = "4.20.0"
 
   role_name             = "${var.cluster_name}-ebs-csi-role"
   attach_ebs_csi_policy = true
@@ -213,7 +213,7 @@ module "eks_ebs_csi_irsa" {
 # Allow PVCs backed by EFS
 module "eks_efs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.18.0"
+  version = "4.20.0"
 
   role_name = "${var.cluster_name}-efs-csi-role"
   oidc_providers = {
