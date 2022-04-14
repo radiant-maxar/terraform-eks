@@ -56,7 +56,7 @@ variable "efs_csi_driver_version" {
 
 variable "eks_managed_node_groups" {
   description = "Managed node groups for the EKS cluster."
-  type        = map(any)
+  type        = any
 }
 
 variable "kubernetes_version" {
@@ -97,7 +97,7 @@ variable "node_security_group_additional_rules" {
     }
   }
   description = "Additional node security group rules."
-  type        = map(any)
+  type        = any
 }
 
 variable "nvidia_device_plugin" {
@@ -125,13 +125,13 @@ variable "public_subnets" {
 variable "system_masters_roles" {
   default     = ["PowerUsers"]
   description = "Roles from the AWS account allowed system:masters to the EKS cluster."
-  type        = list(any)
+  type        = list(string)
 }
 
 variable "tags" {
   default     = {}
   description = "Default AWS tags to apply to resources."
-  type        = map(any)
+  type        = map(string)
 }
 
 variable "vpc_cidr" {
