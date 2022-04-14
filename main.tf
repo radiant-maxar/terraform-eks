@@ -397,16 +397,6 @@ resource "null_resource" "eks_delete_lb_validating_webook" {
 
 ## EBS CSI Storage
 
-# Don't want gp2 storageclass set as default.
-resource "null_resource" "eks_disable_gp2" {
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' patch storageclass gp2 -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'"
-  }
-  depends_on = [
-    module.eks,
-  ]
-}
-
 resource "kubernetes_service_account" "eks_ebs_controller_sa" {
   metadata {
     name      = "ebs-csi-controller-sa"
@@ -473,6 +463,16 @@ resource "kubernetes_storage_class" "eks_ebs_storage_class" {
 
   depends_on = [
     helm_release.aws_ebs_csi_driver,
+  ]
+}
+
+# Don't want gp2 storageclass set as default.
+resource "null_resource" "eks_disable_gp2" {
+  provisioner "local-exec" {
+    command = "kubectl --context='${var.cluster_name}' patch storageclass gp2 -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'"
+  }
+  depends_on = [
+    kubernetes_storage_class.eks_ebs_storage_class
   ]
 }
 
