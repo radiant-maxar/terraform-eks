@@ -279,6 +279,8 @@ resource "aws_iam_role_policy_attachment" "eks_efs_csi" {
 
 resource "aws_efs_file_system" "eks_efs" {
   creation_token = "${var.cluster_name}-efs"
+  encrypted      = true
+  kms_key_id     = aws_kms_key.this.key_id
   tags           = var.tags
 }
 
