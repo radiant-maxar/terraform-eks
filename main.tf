@@ -5,6 +5,13 @@ locals {
   aws_account_id = data.aws_caller_identity.default.account_id
   aws_region     = data.aws_region.default.name
   aws_auth_file  = "${path.root}/aws-auth-${var.cluster_name}.yaml"
+  aws_auth_roles = [
+    for role in var.system_masters_roles: {
+      rolearn  = "arn:aws:iam::${local.aws_account_id}:role/${role}"
+      username = role
+      groups   = ["system:masters"]
+    }
+  ]
 
   # AWS Load Balancer Controller needs these additional security groups to work.
   load_balancer_security_group_rules = {
@@ -93,6 +100,9 @@ module "eks" {
     resources        = ["secrets"]
   }]
 
+  aws_auth_roles            = local.aws_auth_roles
+  manage_aws_auth_configmap = true
+
   enable_irsa = true
   subnet_ids  = concat(var.public_subnets, var.private_subnets)
   vpc_id      = var.vpc_id
@@ -127,38 +137,10 @@ resource "null_resource" "eks_kubeconfig" {
   ]
 }
 
-# Configure aws-auth to allow any addition roles for system:masters access.
-resource "local_file" "eks_aws_auth_configmap" {
-  content = templatefile("${path.module}/templates/aws_auth_configmap.tpl", {
-    aws_account_id          = local.aws_account_id
-    aws_auth_configmap_yaml = module.eks.aws_auth_configmap_yaml
-    system_masters_roles    = var.system_masters_roles
-  })
-  filename        = local.aws_auth_file
-  file_permission = "0644"
-
-  depends_on = [
-    module.eks,
-  ]
-}
-
-resource "null_resource" "eks_poweruser_auth" {
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' patch configmap/aws-auth -n kube-system --patch-file ${local.aws_auth_file}"
-  }
-  triggers = {
-    auth_configmap = local_file.eks_aws_auth_configmap.content
-  }
-  depends_on = [
-    local_file.eks_aws_auth_configmap,
-    null_resource.eks_kubeconfig,
-  ]
-}
-
 # Authorize Amazon Load Balancer Controller
 module "eks_lb_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.20.0"
+  version = "4.20.1"
 
   role_name                              = "${var.cluster_name}-lb-role"
   attach_load_balancer_controller_policy = true
@@ -176,7 +158,7 @@ module "eks_lb_irsa" {
 # Authorize VPC CNI via IRSA.
 module "eks_vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.20.0"
+  version = "4.20.1"
 
   role_name             = "${var.cluster_name}-vpc-cni-role"
   attach_vpc_cni_policy = true
@@ -195,7 +177,7 @@ module "eks_vpc_cni_irsa" {
 # Allow PVCs backed by EBS
 module "eks_ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.20.0"
+  version = "4.20.1"
 
   role_name             = "${var.cluster_name}-ebs-csi-role"
   attach_ebs_csi_policy = true
@@ -213,7 +195,7 @@ module "eks_ebs_csi_irsa" {
 # Allow PVCs backed by EFS
 module "eks_efs_csi_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.20.0"
+  version = "4.20.1"
 
   role_name             = "${var.cluster_name}-efs-csi-controller-role"
   attach_efs_csi_policy = true
@@ -231,7 +213,7 @@ module "eks_efs_csi_controller_irsa" {
 
 module "eks_efs_csi_node_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "4.20.0"
+  version = "4.20.1"
 
   role_name = "${var.cluster_name}-efs-csi-node-role"
   oidc_providers = {
