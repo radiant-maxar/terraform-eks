@@ -17,7 +17,7 @@ locals {
       source_cluster_security_group = true
     }
     ingress_cluster_9443 = {
-      description                   = "Cluster webooks to node grups"
+      description                   = "Cluster webooks to node groups"
       protocol                      = "tcp"
       from_port                     = 9443
       to_port                       = 9443
@@ -211,16 +211,33 @@ module "eks_ebs_csi_irsa" {
 }
 
 # Allow PVCs backed by EFS
-module "eks_efs_csi_irsa" {
+module "eks_efs_csi_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "4.20.0"
 
-  role_name = "${var.cluster_name}-efs-csi-role"
+  role_name             = "${var.cluster_name}-efs-csi-controller-role"
+  attach_efs_csi_policy = true
+
   oidc_providers = {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
         "kube-system:efs-csi-controller-sa",
+      ]
+    }
+  }
+  tags = var.tags
+}
+
+module "eks_efs_csi_node_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "4.20.0"
+
+  role_name = "${var.cluster_name}-efs-csi-node-role"
+  oidc_providers = {
+    main = {
+      provider_arn = module.eks.oidc_provider_arn
+      namespace_service_accounts = [
         "kube-system:efs-csi-node-sa",
       ]
     }
@@ -228,59 +245,35 @@ module "eks_efs_csi_irsa" {
   tags = var.tags
 }
 
-data "aws_iam_policy_document" "eks_efs_csi" {
+data "aws_iam_policy_document" "eks_efs_csi_node" {
   statement {
     actions = [
-      "elasticfilesystem:DescribeAccessPoints",
-      "elasticfilesystem:DescribeFileSystems",
       "elasticfilesystem:DescribeMountTargets",
       "ec2:DescribeAvailabilityZones",
     ]
     resources = ["*"]
   }
-
-  statement {
-    actions   = ["elasticfilesystem:CreateAccessPoint"]
-    resources = ["*"]
-
-    condition {
-      test     = "StringLike"
-      variable = "aws:RequestTag/efs.csi.aws.com/cluster"
-      values   = ["true"]
-    }
-  }
-
-  statement {
-    actions   = ["elasticfilesystem:DeleteAccessPoint"]
-    resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/efs.csi.aws.com/cluster"
-      values   = ["true"]
-    }
-  }
 }
 
-resource "aws_iam_policy" "eks_efs_csi" {
-  name        = "AmazonEKS_EFS_CSI_Driver_Policy-${var.cluster_name}"
-  description = "Provides permissions to manage EFS the container storage interface driver"
-  policy      = data.aws_iam_policy_document.eks_efs_csi.json
+resource "aws_iam_policy" "eks_efs_csi_node" {
+  name        = "AmazonEKS_EFS_CSI_Node_Policy-${var.cluster_name}"
+  description = "Provides node permissions to use the EFS CSI driver"
+  policy      = data.aws_iam_policy_document.eks_efs_csi_node.json
   tags        = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "eks_efs_csi" {
-  role       = "${var.cluster_name}-efs-csi-role"
-  policy_arn = aws_iam_policy.eks_efs_csi.arn
+resource "aws_iam_role_policy_attachment" "eks_efs_csi_node" {
+  role       = "${var.cluster_name}-efs-csi-node-role"
+  policy_arn = aws_iam_policy.eks_efs_csi_node.arn
   depends_on = [
-    module.eks_efs_csi_irsa
+    module.eks_efs_csi_node_irsa
   ]
 }
 
 resource "aws_efs_file_system" "eks_efs" {
   creation_token = "${var.cluster_name}-efs"
   encrypted      = true
-  kms_key_id     = aws_kms_key.this.key_id
+  kms_key_id     = aws_kms_key.this.arn
   tags           = var.tags
 }
 
@@ -335,6 +328,7 @@ resource "kubernetes_service_account" "eks_lb_controller" {
   }
 
   depends_on = [
+    module.eks_lb_irsa,
     module.eks,
   ]
 }
@@ -409,6 +403,7 @@ resource "kubernetes_service_account" "eks_ebs_controller_sa" {
     }
   }
   depends_on = [
+    module.eks_ebs_csi_irsa,
     module.eks,
   ]
 }
@@ -485,10 +480,11 @@ resource "kubernetes_service_account" "eks_efs_controller_sa" {
       "app.kubernetes.io/name" = "aws-efs-csi-driver"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-role"
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
     }
   }
   depends_on = [
+    module.eks_efs_csi_controller_irsa,
     module.eks,
   ]
 }
@@ -501,10 +497,11 @@ resource "kubernetes_service_account" "eks_efs_node_sa" {
       "app.kubernetes.io/name" = "aws-efs-csi-driver"
     }
     annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-role"
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
     }
   }
   depends_on = [
+    module.eks_efs_csi_node_irsa,
     module.eks,
   ]
 }
