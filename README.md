@@ -122,4 +122,4 @@ module "eks" {
 
 ## Known Issues
 
-Using the `kubernetes` / `helm` [providers at the same time as provisioning the EKS cluster](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources) can lead to errors about resolving the EKS cluster OIDC endpoints via DNS on the first `terraform apply`.  Running again resolves these problems.
+Persistent volumes or ALBs (`Ingress`) or NLBs (`LoadBalancer`) that aren't deleted prior to cluster removal will persist.  In the case of ALB/NLBs their dynamic security groups may prevent deletion of the VPC associated with the EKS cluster.
