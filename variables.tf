@@ -60,7 +60,7 @@ variable "eks_managed_node_groups" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.21"
+  default     = "1.22"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
