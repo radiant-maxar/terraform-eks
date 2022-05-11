@@ -43,7 +43,7 @@ locals {
     }
   }
 
-  public_subnets         = slice(local.vpc_subnets, 0, 2)
+  public_subnets       = slice(local.vpc_subnets, 0, 2)
   public_node_defaults = {
     block_device_mappings = {
       root = {
@@ -95,6 +95,9 @@ module "eks" {
   vpc_cidr        = local.vpc_cidr
   vpc_id          = module.eks_vpc.vpc_id
 
+  # This may be set to false once cluster is created, IRSA policies
+  # attached to the `aws-node` service account allow removal of CNI
+  # policies from the EKS node groups roles.
   iam_role_attach_cni_policy = true
 
   eks_managed_node_groups = {
