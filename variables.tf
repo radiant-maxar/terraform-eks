@@ -77,6 +77,12 @@ variable "lb_controller_version" {
   type        = string
 }
 
+variable "cluster_security_group_additional_rules" {
+  description = "Additional security group rules to add to the cluster security group created."
+  type        = any
+  default     = {}
+}
+
 variable "node_security_group_additional_rules" {
   default = {
     ingress_self_all = {

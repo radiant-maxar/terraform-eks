@@ -100,6 +100,8 @@ module "eks" {
     resources        = ["secrets"]
   }]
 
+  cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
+
   aws_auth_roles            = local.aws_auth_roles
   manage_aws_auth_configmap = true
 
