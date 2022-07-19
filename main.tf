@@ -4,7 +4,6 @@ data "aws_region" "default" {}
 locals {
   aws_account_id = data.aws_caller_identity.default.account_id
   aws_region     = data.aws_region.default.name
-  aws_auth_file  = "${path.root}/aws-auth-${var.cluster_name}.yaml"
   aws_auth_roles = [
     for role in var.system_masters_roles : {
       rolearn  = "arn:aws:iam::${local.aws_account_id}:role/${role}"
@@ -277,7 +276,7 @@ provider "helm" {
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
     exec {
-      api_version = "client.authentication.k8s.io/v1alpha1"
+      api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed
       args = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_id]
@@ -290,7 +289,7 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
   exec {
-    api_version = "client.authentication.k8s.io/v1alpha1"
+    api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
     args        = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_id]
   }
