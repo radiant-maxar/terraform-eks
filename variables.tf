@@ -16,7 +16,7 @@ variable "cert_manager_acme_email" {
 }
 
 variable "cert_manager_acme_server" {
-  default     = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  default     = "https://acme-v02.api.letsencrypt.org/directory"
   description = "ACME server for use by cert-manager."
   type        = string
 }
