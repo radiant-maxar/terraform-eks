@@ -3,6 +3,30 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "cert_manager_version" {
+  default     = "1.8.2"
+  description = "Version of cert-manager to install."
+  type        = string
+}
+
+variable "cert_manager_acme_email" {
+  default     = ""
+  description = "Email address to use for ACME with cert-manager."
+  type        = string
+}
+
+variable "cert_manager_acme_server" {
+  default     = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  description = "ACME server for use by cert-manager."
+  type        = string
+}
+
+variable "cert_manager_route53_zone_id" {
+  default     = ""
+  description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
+  type        = string
+}
+
 # The ECR repository is not the same for every region, in particular
 # those for govcloud:
 #   https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html
