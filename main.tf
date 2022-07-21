@@ -688,7 +688,6 @@ EOT
 
   depends_on = [
     module.cert_manager_irsa[0],
-    kubernetes_namespace.cert_manager[0],
     null_resource.cert_manager_crds[0],
   ]
 }
