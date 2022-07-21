@@ -611,7 +611,6 @@ module "cert_manager_irsa" {
   tags = var.tags
 }
 
-
 data "aws_iam_policy_document" "cert_manager" {
   count = local.cert_manager ? 1 : 0
   statement {
