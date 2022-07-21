@@ -666,18 +666,12 @@ resource "null_resource" "cert_manager_crds" {
   ]
 }
 
-resource "kubernetes_namespace" "cert_manager" {
-  count = local.cert_manager ? 1 : 0
-  metadata {
-    name = "cert-manager"
-  }
-}
-
 resource "helm_release" "cert_manager" {
-  count     = local.cert_manager ? 1 : 0
-  name      = "cert-manager"
-  chart     = "https://charts.jetstack.io/charts/cert-manager-v${var.cert_manager_version}.tgz"
-  namespace = "cert-manager"
+  count            = local.cert_manager ? 1 : 0
+  name             = "cert-manager"
+  chart            = "https://charts.jetstack.io/charts/cert-manager-v${var.cert_manager_version}.tgz"
+  create_namespace = true
+  namespace        = "cert-manager"
 
   # Set up values so that service account has correct annotations and that the
   # pod's security context has permissions to read the account token:
