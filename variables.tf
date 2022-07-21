@@ -9,18 +9,6 @@ variable "cert_manager_version" {
   type        = string
 }
 
-variable "cert_manager_acme_email" {
-  default     = ""
-  description = "Email address to use for ACME with cert-manager."
-  type        = string
-}
-
-variable "cert_manager_acme_server" {
-  default     = "https://acme-v02.api.letsencrypt.org/directory"
-  description = "ACME server for use by cert-manager."
-  type        = string
-}
-
 variable "cert_manager_route53_zone_id" {
   default     = ""
   description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
