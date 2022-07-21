@@ -662,7 +662,7 @@ resource "null_resource" "cert_manager_crds" {
     command = "kubectl --context='${var.cluster_name}' apply --filename='https://github.com/cert-manager/cert-manager/releases/download/v${var.cert_manager_version}/cert-manager.crds.yaml'"
   }
   depends_on = [
-    module.eks,
+    null_resource.eks_kubeconfig,
   ]
 }
 
