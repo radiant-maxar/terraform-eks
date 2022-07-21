@@ -1,6 +1,14 @@
 data "aws_caller_identity" "default" {}
 data "aws_region" "default" {}
 
+terraform {
+  required_providers {
+    tls = {
+      version = "<4.0.0"
+    }
+  }
+}
+
 locals {
   aws_account_id = data.aws_caller_identity.default.account_id
   aws_region     = data.aws_region.default.name
@@ -96,7 +104,7 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.26.4"
+  version = "18.26.5"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
@@ -688,41 +696,5 @@ EOT
     module.cert_manager_irsa[0],
     kubernetes_namespace.cert_manager[0],
     null_resource.cert_manager_crds[0],
-  ]
-}
-
-# Configure a LetsEncrypt ClusterIssuer using the Route53 Zone.
-resource "kubernetes_manifest" "cert_manager_issuer" {
-  count = local.cert_manager ? 1 : 0
-
-  manifest = {
-    "apiVersion" = "cert-manager.io/v1"
-    "kind"       = "ClusterIssuer"
-    "metadata" = {
-      "name" = "letsencrypt-${lower(var.cert_manager_route53_zone_id)}"
-    }
-    "spec" = {
-      "acme" = {
-        "email"  = "${var.cert_manager_acme_email}"
-        "server" = "${var.cert_manager_acme_server}"
-        "privateKeySecretRef" = {
-          "name" = "letsencrypt-${lower(var.cert_manager_route53_zone_id)}-account-key"
-        }
-        "solvers" = [
-          {
-            "dns01" = {
-              "route53" = {
-                "hostedZoneID" = var.cert_manager_route53_zone_id
-                "region"       = local.aws_region
-              }
-            }
-          }
-        ]
-      }
-    }
-  }
-
-  depends_on = [
-    helm_release.cert_manager[0]
   ]
 }
