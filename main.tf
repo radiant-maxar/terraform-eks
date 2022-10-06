@@ -149,7 +149,8 @@ module "eks" {
   }
   eks_managed_node_groups = var.eks_managed_node_groups
 
-  tags = var.tags
+  node_security_group_tags = var.node_security_group_tags
+  tags                     = var.tags
 }
 
 # Add EKS to default kubeconfig and set context for it.
