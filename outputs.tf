@@ -15,7 +15,7 @@ output "cluster_oidc_issuer_url" {
 
 output "eks_managed_node_groups" {
   description = "Map of attribute maps for all EKS managed node groups created"
-  value       = module.eks.eks_managed_node_group
+  value       = module.eks.eks_managed_node_groups
 }
 
 output "oidc_provider" {
