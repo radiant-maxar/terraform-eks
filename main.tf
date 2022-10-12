@@ -34,14 +34,6 @@ locals {
 
   # AWS Load Balancer Controller needs these additional security groups to work.
   load_balancer_security_group_rules = {
-    egress_cluster_9443 = {
-      description                   = "Node groups to cluster webooks"
-      protocol                      = "tcp"
-      from_port                     = 9443
-      to_port                       = 9443
-      type                          = "egress"
-      source_cluster_security_group = true
-    }
     ingress_cluster_9443 = {
       description                   = "Cluster webooks to node groups"
       protocol                      = "tcp"
@@ -381,19 +373,6 @@ resource "helm_release" "aws_lb_controller" {
 
   depends_on = [
     kubernetes_service_account.eks_lb_controller
-  ]
-}
-
-# XXX: Unless this webhook is deleted, the load balancer controller won't create
-# ALBs dynamically because AWS requires use of their private CA via cert-manager:
-#   https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/v2_2_4_full.yaml#L840
-resource "null_resource" "eks_delete_lb_validating_webook" {
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' delete ValidatingWebhookConfiguration/aws-load-balancer-webhook"
-  }
-
-  depends_on = [
-    helm_release.aws_lb_controller
   ]
 }
 
