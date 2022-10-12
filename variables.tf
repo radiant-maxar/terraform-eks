@@ -118,6 +118,12 @@ variable "node_security_group_additional_rules" {
   type        = any
 }
 
+variable "node_security_group_tags" {
+  description = "A map of additional tags to add to the node security group created"
+  type        = map(string)
+  default     = {}
+}
+
 variable "nvidia_device_plugin" {
   default     = false
   description = "Whether to install the Nvidia device plugin driver"
