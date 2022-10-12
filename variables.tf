@@ -4,7 +4,7 @@ variable "cluster_name" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.8.2"
+  default     = "1.9.1"
   description = "Version of cert-manager to install."
   type        = string
 }
