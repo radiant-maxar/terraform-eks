@@ -670,13 +670,16 @@ resource "helm_release" "cert_manager" {
   # pod's security context has permissions to read the account token:
   # https://cert-manager.io/docs/configuration/acme/dns01/route53/#service-annotation
   values = [
-    <<EOT
-securityContext:
-  fsGroup: 1001
-serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role
-EOT
+    yamlencode({
+      "securityContext" = {
+        "fsGroup" = 1001
+      }
+      "serviceAccount" = {
+        "annotations" = {
+          "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role"
+        }
+      }
+    })
   ]
 
   depends_on = [
