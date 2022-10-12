@@ -34,14 +34,6 @@ locals {
 
   # AWS Load Balancer Controller needs these additional security groups to work.
   load_balancer_security_group_rules = {
-    egress_cluster_9443 = {
-      description                   = "Node groups to cluster webooks"
-      protocol                      = "tcp"
-      from_port                     = 9443
-      to_port                       = 9443
-      type                          = "egress"
-      source_cluster_security_group = true
-    }
     ingress_cluster_9443 = {
       description                   = "Cluster webooks to node groups"
       protocol                      = "tcp"
@@ -62,7 +54,7 @@ resource "aws_kms_key" "this" {
 
 module "eks_security_group" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "4.9.0"
+  version = "4.13.1"
 
   ingress_cidr_blocks = [var.vpc_cidr]
   name                = var.cluster_name
@@ -96,7 +88,7 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.27.1"
+  version = "18.30.1"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
@@ -166,7 +158,7 @@ resource "null_resource" "eks_kubeconfig" {
 # Authorize Amazon Load Balancer Controller
 module "eks_lb_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.3.0"
+  version = "5.5.1"
 
   role_name                              = "${var.cluster_name}-lb-role"
   attach_load_balancer_controller_policy = true
@@ -184,7 +176,7 @@ module "eks_lb_irsa" {
 # Authorize VPC CNI via IRSA.
 module "eks_vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.3.0"
+  version = "5.5.1"
 
   role_name             = "${var.cluster_name}-vpc-cni-role"
   attach_vpc_cni_policy = true
@@ -203,7 +195,7 @@ module "eks_vpc_cni_irsa" {
 # Allow PVCs backed by EBS
 module "eks_ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.3.0"
+  version = "5.5.1"
 
   role_name             = "${var.cluster_name}-ebs-csi-role"
   attach_ebs_csi_policy = true
@@ -221,7 +213,7 @@ module "eks_ebs_csi_irsa" {
 # Allow PVCs backed by EFS
 module "eks_efs_csi_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.3.0"
+  version = "5.5.1"
 
   role_name             = "${var.cluster_name}-efs-csi-controller-role"
   attach_efs_csi_policy = true
@@ -239,7 +231,7 @@ module "eks_efs_csi_controller_irsa" {
 
 module "eks_efs_csi_node_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.3.0"
+  version = "5.5.1"
 
   role_name = "${var.cluster_name}-efs-csi-node-role"
   oidc_providers = {
@@ -381,19 +373,6 @@ resource "helm_release" "aws_lb_controller" {
 
   depends_on = [
     kubernetes_service_account.eks_lb_controller
-  ]
-}
-
-# XXX: Unless this webhook is deleted, the load balancer controller won't create
-# ALBs dynamically because AWS requires use of their private CA via cert-manager:
-#   https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/v2_2_4_full.yaml#L840
-resource "null_resource" "eks_delete_lb_validating_webook" {
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' delete ValidatingWebhookConfiguration/aws-load-balancer-webhook"
-  }
-
-  depends_on = [
-    helm_release.aws_lb_controller
   ]
 }
 
@@ -597,7 +576,7 @@ resource "null_resource" "eks_nvidia_device_plugin" {
 module "cert_manager_irsa" {
   count   = local.cert_manager ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.3.0"
+  version = "5.5.1"
 
   role_name = "${var.cluster_name}-cert-manager-role"
 
@@ -670,13 +649,16 @@ resource "helm_release" "cert_manager" {
   # pod's security context has permissions to read the account token:
   # https://cert-manager.io/docs/configuration/acme/dns01/route53/#service-annotation
   values = [
-    <<EOT
-securityContext:
-  fsGroup: 1001
-serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role
-EOT
+    yamlencode({
+      "securityContext" = {
+        "fsGroup" = 1001
+      }
+      "serviceAccount" = {
+        "annotations" = {
+          "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role"
+        }
+      }
+    })
   ]
 
   depends_on = [
