@@ -106,10 +106,10 @@ module "eks" {
     }
   }
 
-  cluster_encryption_config = [{
+  cluster_encryption_config = {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
-  }]
+  }
 
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
