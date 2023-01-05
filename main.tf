@@ -110,6 +110,7 @@ module "eks" {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
   }
+  create_kms_key = false
 
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
