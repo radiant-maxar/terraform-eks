@@ -31,18 +31,6 @@ locals {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-
-  # AWS Load Balancer Controller needs these additional security groups to work.
-  load_balancer_security_group_rules = {
-    ingress_cluster_9443 = {
-      description                   = "Cluster webooks to node groups"
-      protocol                      = "tcp"
-      from_port                     = 9443
-      to_port                       = 9443
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-  }
 }
 
 resource "aws_kms_key" "this" {
@@ -123,7 +111,6 @@ module "eks" {
 
   node_security_group_additional_rules = merge(
     local.cert_manager ? local.cert_manager_security_group_rules : {},
-    local.load_balancer_security_group_rules,
     var.node_security_group_additional_rules
   )
 
