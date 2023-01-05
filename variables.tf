@@ -4,7 +4,7 @@ variable "cluster_name" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.9.1"
+  default     = "1.10.1"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -55,13 +55,13 @@ variable "default_max_size" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.12.0"
+  default     = "2.14.1"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.2.9"
+  default     = "2.3.5"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -72,7 +72,7 @@ variable "eks_managed_node_groups" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.23"
+  default     = "1.24"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
@@ -84,7 +84,7 @@ variable "iam_role_attach_cni_policy" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.4.5"
+  default     = "1.4.6"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
@@ -131,7 +131,7 @@ variable "nvidia_device_plugin" {
 }
 
 variable "nvidia_device_plugin_version" {
-  default     = "0.12.3"
+  default     = "0.13.0"
   description = "Version of the Nvidia device plugin to install."
   type        = string
 }
