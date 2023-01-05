@@ -82,14 +82,9 @@ module "eks" {
   cluster_version = var.kubernetes_version
 
   cluster_addons = {
-    coredns = {
-      resolve_conflicts = "OVERWRITE"
-    }
-    kube-proxy = {
-      resolve_conflicts = "OVERWRITE"
-    }
+    coredns    = {}
+    kube-proxy = {}
     vpc-cni = {
-      resolve_conflicts        = "OVERWRITE"
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }
   }
@@ -98,7 +93,9 @@ module "eks" {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
   }
-  create_kms_key = false
+
+  cluster_endpoint_public_access = true
+  create_kms_key                 = false
 
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
