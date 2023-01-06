@@ -10,9 +10,14 @@ variable "cert_manager_route53_zone_id" {
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Unique name for the EKS cluster."
-  type        = string
+variable "cluster_addons_timeouts" {
+  description = "Create, update, and delete timeout configurations for the cluster addons"
+  type        = map(string)
+  default = {
+    create = "25m"
+    delete = "10m"
+    update = "15m"
+  }
 }
 
 variable "cluster_endpoint_private_access" {
@@ -31,6 +36,11 @@ variable "cluster_endpoint_public_access_cidrs" {
   description = "List of CIDR blocks which can access the Amazon EKS public API server endpoint"
   type        = list(string)
   default     = ["0.0.0.0/0"]
+}
+
+variable "cluster_name" {
+  description = "Unique name for the EKS cluster."
+  type        = string
 }
 
 # The ECR repository is not the same for every region, in particular

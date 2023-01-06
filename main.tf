@@ -96,10 +96,7 @@ module "eks" {
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }
   }
-  cluster_addons_timeouts = {
-    create = "25m"
-    delete = "10m"
-  }
+  cluster_addons_timeouts = var.cluster_addons_timeouts
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
