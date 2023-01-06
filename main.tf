@@ -105,17 +105,17 @@ module "eks" {
     resources        = ["secrets"]
   }
 
-  cluster_endpoint_public_access = true
-  create_kms_key                 = false
-
+  cluster_endpoint_private_access         = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access          = var.cluster_endpoint_public_access
+  cluster_endpoint_public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
   aws_auth_roles            = local.aws_auth_roles
+  create_kms_key            = false
   manage_aws_auth_configmap = true
-
-  enable_irsa = true
-  subnet_ids  = concat(var.public_subnets, var.private_subnets)
-  vpc_id      = var.vpc_id
+  enable_irsa               = true
+  subnet_ids                = concat(var.public_subnets, var.private_subnets)
+  vpc_id                    = var.vpc_id
 
   node_security_group_additional_rules = merge(
     local.cert_manager ? local.cert_manager_security_group_rules : {},

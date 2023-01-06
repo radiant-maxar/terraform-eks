@@ -1,8 +1,3 @@
-variable "cluster_name" {
-  description = "Unique name for the EKS cluster."
-  type        = string
-}
-
 variable "cert_manager_version" {
   default     = "1.10.1"
   description = "Version of cert-manager to install."
@@ -13,6 +8,29 @@ variable "cert_manager_route53_zone_id" {
   default     = ""
   description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
   type        = string
+}
+
+variable "cluster_name" {
+  description = "Unique name for the EKS cluster."
+  type        = string
+}
+
+variable "cluster_endpoint_private_access" {
+  description = "Indicates whether or not the Amazon EKS private API server endpoint is enabled"
+  type        = bool
+  default     = false
+}
+
+variable "cluster_endpoint_public_access" {
+  description = "Indicates whether or not the Amazon EKS public API server endpoint is enabled"
+  type        = bool
+  default     = true
+}
+
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "List of CIDR blocks which can access the Amazon EKS public API server endpoint"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 # The ECR repository is not the same for every region, in particular
