@@ -82,6 +82,13 @@ module "eks" {
   cluster_version = var.kubernetes_version
 
   cluster_addons = {
+    preserve    = true
+    most_recent = true
+    timeouts = {
+      create = "25m"
+      delete = "10m"
+    }
+
     coredns    = {}
     kube-proxy = {}
     vpc-cni = {
