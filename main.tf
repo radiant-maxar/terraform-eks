@@ -82,20 +82,24 @@ module "eks" {
   cluster_version = var.kubernetes_version
 
   cluster_addons = {
-    preserve    = true
-    most_recent = true
-    timeouts = {
-      create = "25m"
-      delete = "10m"
+    coredns = {
+      most_recent = true
+      preserve    = true
     }
-
-    coredns    = {}
-    kube-proxy = {}
+    kube-proxy = {
+      most_recent = true
+      preserve    = true
+    }
     vpc-cni = {
+      most_recent              = true
+      preserve                 = true
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }
   }
-
+  cluster_addons_timeouts = {
+    create = "25m"
+    delete = "10m"
+  }
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
