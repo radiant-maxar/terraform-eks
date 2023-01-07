@@ -76,7 +76,7 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.5.0"
+  version = "19.5.1"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
