@@ -83,15 +83,15 @@ module "eks" {
 
   cluster_addons = {
     coredns = {
-      most_recent = true
+      most_recent = var.cluster_addons_most_recent
       preserve    = true
     }
     kube-proxy = {
-      most_recent = true
+      most_recent = var.cluster_addons_most_recent
       preserve    = true
     }
     vpc-cni = {
-      most_recent              = true
+      most_recent              = var.cluster_addons_most_recent
       preserve                 = true
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }

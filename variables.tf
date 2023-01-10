@@ -10,6 +10,12 @@ variable "cert_manager_route53_zone_id" {
   type        = string
 }
 
+variable "cluster_addons_most_recent" {
+  description = "Indicates whether to use the most recent version of cluster addons"
+  type        = bool
+  default     = true
+}
+
 variable "cluster_addons_timeouts" {
   description = "Create, update, and delete timeout configurations for the cluster addons"
   type        = map(string)
