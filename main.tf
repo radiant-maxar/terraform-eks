@@ -31,18 +31,6 @@ locals {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-
-  # AWS Load Balancer Controller needs these additional security groups to work.
-  load_balancer_security_group_rules = {
-    ingress_cluster_9443 = {
-      description                   = "Cluster webooks to node groups"
-      protocol                      = "tcp"
-      from_port                     = 9443
-      to_port                       = 9443
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-  }
 }
 
 resource "aws_kms_key" "this" {
@@ -54,7 +42,7 @@ resource "aws_kms_key" "this" {
 
 module "eks_security_group" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "4.13.1"
+  version = "4.16.2"
 
   ingress_cidr_blocks = [var.vpc_cidr]
   name                = var.cluster_name
@@ -88,41 +76,46 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.30.1"
+  version = "19.5.1"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
 
   cluster_addons = {
     coredns = {
-      resolve_conflicts = "OVERWRITE"
+      most_recent = var.cluster_addons_most_recent
+      preserve    = true
     }
     kube-proxy = {
-      resolve_conflicts = "OVERWRITE"
+      most_recent = var.cluster_addons_most_recent
+      preserve    = true
     }
     vpc-cni = {
-      resolve_conflicts        = "OVERWRITE"
+      most_recent              = var.cluster_addons_most_recent
+      preserve                 = true
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }
   }
-
-  cluster_encryption_config = [{
+  cluster_addons_timeouts = var.cluster_addons_timeouts
+  cluster_encryption_config = {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
-  }]
+  }
 
+  cluster_endpoint_private_access         = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access          = var.cluster_endpoint_public_access
+  cluster_endpoint_public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
   aws_auth_roles            = local.aws_auth_roles
+  create_kms_key            = false
   manage_aws_auth_configmap = true
-
-  enable_irsa = true
-  subnet_ids  = concat(var.public_subnets, var.private_subnets)
-  vpc_id      = var.vpc_id
+  enable_irsa               = true
+  subnet_ids                = concat(var.public_subnets, var.private_subnets)
+  vpc_id                    = var.vpc_id
 
   node_security_group_additional_rules = merge(
     local.cert_manager ? local.cert_manager_security_group_rules : {},
-    local.load_balancer_security_group_rules,
     var.node_security_group_additional_rules
   )
 
@@ -158,7 +151,7 @@ resource "null_resource" "eks_kubeconfig" {
 # Authorize Amazon Load Balancer Controller
 module "eks_lb_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.5.1"
+  version = "5.9.2"
 
   role_name                              = "${var.cluster_name}-lb-role"
   attach_load_balancer_controller_policy = true
@@ -176,7 +169,7 @@ module "eks_lb_irsa" {
 # Authorize VPC CNI via IRSA.
 module "eks_vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.5.1"
+  version = "5.9.2"
 
   role_name             = "${var.cluster_name}-vpc-cni-role"
   attach_vpc_cni_policy = true
@@ -195,7 +188,7 @@ module "eks_vpc_cni_irsa" {
 # Allow PVCs backed by EBS
 module "eks_ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.5.1"
+  version = "5.9.2"
 
   role_name             = "${var.cluster_name}-ebs-csi-role"
   attach_ebs_csi_policy = true
@@ -213,7 +206,7 @@ module "eks_ebs_csi_irsa" {
 # Allow PVCs backed by EFS
 module "eks_efs_csi_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.5.1"
+  version = "5.9.2"
 
   role_name             = "${var.cluster_name}-efs-csi-controller-role"
   attach_efs_csi_policy = true
@@ -231,7 +224,7 @@ module "eks_efs_csi_controller_irsa" {
 
 module "eks_efs_csi_node_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.5.1"
+  version = "5.9.2"
 
   role_name = "${var.cluster_name}-efs-csi-node-role"
   oidc_providers = {
@@ -296,7 +289,7 @@ provider "helm" {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_id]
+      args = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_name]
     }
   }
 }
@@ -308,7 +301,7 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_id]
+    args        = ["eks", "get-token", "--region", local.aws_region, "--cluster-name", module.eks.cluster_name]
   }
 }
 
@@ -576,7 +569,7 @@ resource "null_resource" "eks_nvidia_device_plugin" {
 module "cert_manager_irsa" {
   count   = local.cert_manager ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.5.1"
+  version = "5.9.2"
 
   role_name = "${var.cluster_name}-cert-manager-role"
 

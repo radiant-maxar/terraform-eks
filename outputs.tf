@@ -18,6 +18,21 @@ output "eks_managed_node_groups" {
   value       = module.eks.eks_managed_node_groups
 }
 
+output "kms_key_arn" {
+  description = "The Amazon Resource Name (ARN) of the KMS key for the EKS cluster."
+  value       = aws_kms_key.this.arn
+}
+
+output "node_security_group_arn" {
+  description = "ARN of the EKS node shared security group"
+  value       = module.eks.node_security_group_arn
+}
+
+output "node_security_group_id" {
+  description = "ID of the EKS node shared security group"
+  value       = module.eks.node_security_group_id
+}
+
 output "oidc_provider" {
   description = "The OpenID Connect identity provider (issuer URL without leading `https://`)"
   value       = module.eks.oidc_provider
