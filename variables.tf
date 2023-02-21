@@ -1,5 +1,5 @@
 variable "cert_manager_version" {
-  default     = "1.10.1"
+  default     = "1.11.0"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -89,13 +89,13 @@ variable "default_max_size" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.14.1"
+  default     = "2.17.0"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.3.5"
+  default     = "2.3.8"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -118,7 +118,7 @@ variable "iam_role_attach_cni_policy" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.4.6"
+  default     = "1.4.7"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
