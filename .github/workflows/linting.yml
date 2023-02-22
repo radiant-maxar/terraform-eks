@@ -16,6 +16,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
       - name: Terraform Format
         run: terraform fmt -check -diff -recursive .
+
   tfsec:
     name: tfsec
     runs-on: ubuntu-latest

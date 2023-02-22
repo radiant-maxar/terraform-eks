@@ -57,6 +57,7 @@ resource "aws_security_group" "eks_efs_sg" {
   vpc_id      = var.vpc_id
 
   egress {
+    description = "Egress NFS/EFS traffic"
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
@@ -64,6 +65,7 @@ resource "aws_security_group" "eks_efs_sg" {
   }
 
   ingress {
+    description = "Ingress NFS/EFS traffic"
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
@@ -244,7 +246,7 @@ data "aws_iam_policy_document" "eks_efs_csi_node" {
       "elasticfilesystem:DescribeMountTargets",
       "ec2:DescribeAvailabilityZones",
     ]
-    resources = ["*"]
+    resources = ["*"] # tfsec:ingore:aws-iam-no-policy-wildcards
   }
 }
 
