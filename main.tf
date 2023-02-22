@@ -13,24 +13,6 @@ locals {
   ]
 
   cert_manager = length(var.cert_manager_route53_zone_id) > 0
-  cert_manager_security_group_rules = {
-    egress_dns_tcp = {
-      description = "Egress all DNS/TCP to internet"
-      protocol    = "tcp"
-      from_port   = 53
-      to_port     = 53
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress_dns_udp = {
-      description = "Egress all DNS/UDP to internet"
-      protocol    = "udp"
-      from_port   = 53
-      to_port     = 53
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  }
 }
 
 resource "aws_kms_key" "this" {
@@ -46,7 +28,7 @@ resource "aws_security_group" "eks_efs_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Ingress NFS/EFS traffic"
+    description = "Ingress NFS traffic for EFS"
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
@@ -98,10 +80,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   subnet_ids                = concat(var.public_subnets, var.private_subnets)
   vpc_id                    = var.vpc_id
 
-  node_security_group_additional_rules = merge(
-    local.cert_manager ? local.cert_manager_security_group_rules : {},
-    var.node_security_group_additional_rules
-  )
+  node_security_group_additional_rules = var.node_security_group_additional_rules
 
   eks_managed_node_group_defaults = {
     ami_type                   = var.default_ami_type
