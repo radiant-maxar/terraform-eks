@@ -241,12 +241,12 @@ module "eks_efs_csi_node_irsa" {
 }
 
 data "aws_iam_policy_document" "eks_efs_csi_node" {
-  statement {
+  statement { # tfsec:ingore:aws-iam-no-policy-wildcards
     actions = [
       "elasticfilesystem:DescribeMountTargets",
       "ec2:DescribeAvailabilityZones",
     ]
-    resources = ["*"] # tfsec:ingore:aws-iam-no-policy-wildcards
+    resources = ["*"]
   }
 }
 
