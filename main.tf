@@ -56,22 +56,6 @@ resource "aws_security_group" "eks_efs_sg" {
   tags = var.tags
 }
 
-resource "aws_security_group" "eks" {
-  name        = "${var.cluster_name}-efs-sg"
-  description = "Security group for EFS clients in EKS VPC"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    description = "Ingress NFS/EFS traffic"
-    from_port   = 2049
-    to_port     = 2049
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
-  tags = var.tags
-}
-
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-eks-enable-control-plane-logging
   source  = "terraform-aws-modules/eks/aws"
