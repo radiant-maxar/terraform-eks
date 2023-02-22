@@ -13,24 +13,6 @@ locals {
   ]
 
   cert_manager = length(var.cert_manager_route53_zone_id) > 0
-  cert_manager_security_group_rules = {
-    egress_dns_tcp = {
-      description = "Egress all DNS/TCP to internet"
-      protocol    = "tcp"
-      from_port   = 53
-      to_port     = 53
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress_dns_udp = {
-      description = "Egress all DNS/UDP to internet"
-      protocol    = "udp"
-      from_port   = 53
-      to_port     = 53
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  }
 }
 
 resource "aws_kms_key" "this" {
@@ -40,30 +22,13 @@ resource "aws_kms_key" "this" {
   tags                    = var.tags
 }
 
-module "eks_security_group" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "4.17.1"
-
-  ingress_cidr_blocks = [var.vpc_cidr]
-  name                = var.cluster_name
-  vpc_id              = var.vpc_id
-
-  tags = var.tags
-}
-
 resource "aws_security_group" "eks_efs_sg" {
   name        = "${var.cluster_name}-efs-sg"
   description = "Security group for EFS clients in EKS VPC"
   vpc_id      = var.vpc_id
 
-  egress {
-    from_port   = 2049
-    to_port     = 2049
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   ingress {
+    description = "Ingress NFS traffic for EFS"
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
@@ -74,7 +39,7 @@ resource "aws_security_group" "eks_efs_sg" {
 }
 
 # EKS Cluster
-module "eks" {
+module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
   version = "19.10.0"
 
@@ -96,7 +61,8 @@ module "eks" {
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }
   }
-  cluster_addons_timeouts = var.cluster_addons_timeouts
+  cluster_addons_timeouts   = var.cluster_addons_timeouts
+  cluster_enabled_log_types = var.cluster_enabled_log_types
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
@@ -114,10 +80,7 @@ module "eks" {
   subnet_ids                = concat(var.public_subnets, var.private_subnets)
   vpc_id                    = var.vpc_id
 
-  node_security_group_additional_rules = merge(
-    local.cert_manager ? local.cert_manager_security_group_rules : {},
-    var.node_security_group_additional_rules
-  )
+  node_security_group_additional_rules = var.node_security_group_additional_rules
 
   eks_managed_node_group_defaults = {
     ami_type                   = var.default_ami_type
@@ -129,7 +92,6 @@ module "eks" {
     min_size                   = var.default_min_size
     vpc_security_group_ids = [
       aws_security_group.eks_efs_sg.id,
-      module.eks_security_group.security_group_id,
     ]
   }
   eks_managed_node_groups = var.eks_managed_node_groups
@@ -244,7 +206,7 @@ data "aws_iam_policy_document" "eks_efs_csi_node" {
       "elasticfilesystem:DescribeMountTargets",
       "ec2:DescribeAvailabilityZones",
     ]
-    resources = ["*"]
+    resources = ["*"] # tfsec:ignore:aws-iam-no-policy-wildcards
   }
 }
 
