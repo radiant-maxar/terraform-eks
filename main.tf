@@ -45,8 +45,6 @@ resource "aws_security_group" "eks_efs_sg" {
   description = "Security group for EFS clients in EKS VPC"
   vpc_id      = var.vpc_id
 
-  egress {}
-
   ingress {
     description = "Ingress NFS/EFS traffic"
     from_port   = 2049
