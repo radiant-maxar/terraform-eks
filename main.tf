@@ -40,29 +40,26 @@ resource "aws_kms_key" "this" {
   tags                    = var.tags
 }
 
-module "eks_security_group" {
-  source  = "terraform-aws-modules/security-group/aws"
-  version = "4.17.1"
-
-  ingress_cidr_blocks = [var.vpc_cidr]
-  name                = var.cluster_name
-  vpc_id              = var.vpc_id
-
-  tags = var.tags
-}
-
 resource "aws_security_group" "eks_efs_sg" {
   name        = "${var.cluster_name}-efs-sg"
   description = "Security group for EFS clients in EKS VPC"
   vpc_id      = var.vpc_id
 
-  egress {
-    description = "Egress NFS/EFS traffic"
+  ingress {
+    description = "Ingress NFS/EFS traffic"
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
+
+  tags = var.tags
+}
+
+resource "aws_security_group" "eks" {
+  name        = "${var.cluster_name}-efs-sg"
+  description = "Security group for EFS clients in EKS VPC"
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "Ingress NFS/EFS traffic"
@@ -131,7 +128,6 @@ module "eks" { # tfsec:ignore:aws-eks-enable-control-plane-logging
     min_size                   = var.default_min_size
     vpc_security_group_ids = [
       aws_security_group.eks_efs_sg.id,
-      module.eks_security_group.security_group_id,
     ]
   }
   eks_managed_node_groups = var.eks_managed_node_groups
