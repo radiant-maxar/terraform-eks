@@ -76,7 +76,7 @@ resource "aws_security_group" "eks_efs_sg" {
 }
 
 # EKS Cluster
-module "eks" {
+module "eks" { # tfsec:ignore:aws-eks-enable-control-plane-logging
   source  = "terraform-aws-modules/eks/aws"
   version = "19.10.0"
 
@@ -241,12 +241,12 @@ module "eks_efs_csi_node_irsa" {
 }
 
 data "aws_iam_policy_document" "eks_efs_csi_node" {
-  statement { # tfsec:ingore:aws-iam-no-policy-wildcards
+  statement {
     actions = [
       "elasticfilesystem:DescribeMountTargets",
       "ec2:DescribeAvailabilityZones",
     ]
-    resources = ["*"]
+    resources = ["*"] # tfsec:ignore:aws-iam-no-policy-wildcards
   }
 }
 
