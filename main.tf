@@ -57,7 +57,7 @@ resource "aws_security_group" "eks_efs_sg" {
 }
 
 # EKS Cluster
-module "eks" { # tfsec:ignore:aws-eks-enable-control-plane-logging
+module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
   version = "19.10.0"
 
@@ -79,7 +79,8 @@ module "eks" { # tfsec:ignore:aws-eks-enable-control-plane-logging
       service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
     }
   }
-  cluster_addons_timeouts = var.cluster_addons_timeouts
+  cluster_addons_timeouts   = var.cluster_addons_timeouts
+  cluster_enabled_log_types = var.cluster_enabled_log_types
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]

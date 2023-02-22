@@ -26,6 +26,12 @@ variable "cluster_addons_timeouts" {
   }
 }
 
+variable "cluster_enabled_log_types" {
+  description = "A list of the desired control plane logs to enable. For more information, see Amazon EKS Control Plane Logging documentation (https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html)"
+  default     = ["api", "authenticator", "audit", "scheduler", "controllerManager"]
+  type        = list(string)
+}
+
 variable "cluster_endpoint_private_access" {
   description = "Indicates whether or not the Amazon EKS private API server endpoint is enabled"
   type        = bool
