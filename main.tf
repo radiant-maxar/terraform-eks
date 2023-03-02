@@ -268,19 +268,28 @@ provider "kubernetes" {
 }
 
 ## AWS Load Balancer Controller
-resource "kubernetes_service_account" "eks_lb_controller" {
-  metadata {
-    name      = "aws-load-balancer-controller"
-    namespace = "kube-system"
-    labels = {
-      "app.kubernetes.io/component" = "controller"
-      "app.kubernetes.io/name"      = "aws-load-balancer-controller"
-    }
-    annotations = {
-      "eks.amazonaws.com/role-arn"               = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-lb-role"
-      "eks.amazonaws.com/sts-regional-endpoints" = "true"
-    }
-  }
+resource "helm_release" "aws_lb_controller" {
+  name       = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  chart      = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  version    = var.lb_controller_version
+
+  values = [
+    yamlencode({
+      "clusterName" = var.cluster_name
+      "defaultTags" = var.tags
+      "region"      = local.aws_region
+      "serviceAccount" = {
+        "annotations" = {
+          "eks.amazonaws.com/role-arn"               = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-lb-role"
+          "eks.amazonaws.com/sts-regional-endpoints" = "true"
+        }
+        "name" = "aws-load-balancer-controller"
+      }
+      "vpcId" = var.vpc_id
+    })
+  ]
 
   depends_on = [
     module.eks_lb_irsa,
@@ -288,98 +297,33 @@ resource "kubernetes_service_account" "eks_lb_controller" {
   ]
 }
 
-resource "helm_release" "aws_lb_controller" {
-  name      = "aws-load-balancer-controller"
-  chart     = "https://aws.github.io/eks-charts/aws-load-balancer-controller-${var.lb_controller_version}.tgz"
-  namespace = "kube-system"
+## EBS CSI Storage Driver
+resource "helm_release" "aws_ebs_csi_driver" {
+  name       = "aws-ebs-csi-driver"
+  namespace  = "kube-system"
+  chart      = "aws-ebs-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+  version    = var.ebs_csi_driver_version
 
-  set {
-    name  = "clusterName"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "serviceAccount.name"
-    value = "aws-load-balancer-controller"
-  }
-
-  set {
-    name  = "region"
-    value = local.aws_region
-  }
-
-  set {
-    name  = "vpcId"
-    value = var.vpc_id
-  }
-
-  dynamic "set" {
-    for_each = var.tags
-    content {
-      name  = "defaultTags.${set.key}"
-      value = set.value
-    }
-  }
-
-  depends_on = [
-    kubernetes_service_account.eks_lb_controller
+  values = [
+    yamlencode({
+      "controller" = {
+        "extraVolumeTags" = var.tags
+        "serviceAccount" = {
+          "annotations" = {
+            "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
+          }
+        }
+      }
+      "image" = {
+        "repository" = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
+      }
+    })
   ]
-}
 
-## EBS CSI Storage
-
-resource "kubernetes_service_account" "eks_ebs_controller_sa" {
-  metadata {
-    name      = "ebs-csi-controller-sa"
-    namespace = "kube-system"
-    labels = {
-      "app.kubernetes.io/name" = "aws-ebs-csi-driver"
-    }
-    annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
-    }
-  }
   depends_on = [
     module.eks_ebs_csi_irsa,
     module.eks,
-  ]
-}
-
-resource "helm_release" "aws_ebs_csi_driver" {
-  name      = "aws-ebs-csi-driver"
-  chart     = "https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/download/helm-chart-aws-ebs-csi-driver-${var.ebs_csi_driver_version}/aws-ebs-csi-driver-${var.ebs_csi_driver_version}.tgz"
-  namespace = "kube-system"
-
-  set {
-    name  = "image.repository"
-    value = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
-  }
-
-  set {
-    name  = "controller.serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "controller.serviceAccount.name"
-    value = "ebs-csi-controller-sa"
-  }
-
-  dynamic "set" {
-    for_each = var.tags
-    content {
-      name  = "controller.extraVolumeTags.${set.key}"
-      value = set.value
-    }
-  }
-
-  depends_on = [
-    kubernetes_service_account.eks_ebs_controller_sa,
   ]
 }
 
@@ -413,82 +357,40 @@ resource "null_resource" "eks_disable_gp2" {
   ]
 }
 
-## EFS CSI Storage
-resource "kubernetes_service_account" "eks_efs_controller_sa" {
-  metadata {
-    name      = "efs-csi-controller-sa"
-    namespace = "kube-system"
-    labels = {
-      "app.kubernetes.io/name" = "aws-efs-csi-driver"
-    }
-    annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
-    }
-  }
+## EFS CSI Storage Driver
+resource "helm_release" "aws_efs_csi_driver" {
+  name       = "aws-efs-csi-driver"
+  namespace  = "kube-system"
+  chart      = "aws-efs-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver"
+  version    = var.efs_csi_driver_version
+
+  values = [
+    yamlencode({
+      "controller" = {
+        "serviceAccount" = {
+          "annotations" = {
+            "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
+          }
+        }
+        "tags" = var.tags
+      }
+      "image" = {
+        "repository" = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
+      }
+      "node" = {
+        "serviceAccount" = {
+          "annotations" = {
+            "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
+          }
+        }
+      }
+    })
+  ]
+
   depends_on = [
     module.eks_efs_csi_controller_irsa,
     module.eks,
-  ]
-}
-
-resource "kubernetes_service_account" "eks_efs_node_sa" {
-  metadata {
-    name      = "efs-csi-node-sa"
-    namespace = "kube-system"
-    labels = {
-      "app.kubernetes.io/name" = "aws-efs-csi-driver"
-    }
-    annotations = {
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
-    }
-  }
-  depends_on = [
-    module.eks_efs_csi_node_irsa,
-    module.eks,
-  ]
-}
-
-resource "helm_release" "aws_efs_csi_driver" {
-  name      = "aws-efs-csi-driver"
-  chart     = "https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/download/helm-chart-aws-efs-csi-driver-${var.efs_csi_driver_version}/aws-efs-csi-driver-${var.efs_csi_driver_version}.tgz"
-  namespace = "kube-system"
-
-  set {
-    name  = "image.repository"
-    value = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
-  }
-
-  set {
-    name  = "controller.serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "controller.serviceAccount.name"
-    value = "efs-csi-controller-sa"
-  }
-
-  set {
-    name  = "node.serviceAccount.create"
-    value = "false"
-  }
-
-  set {
-    name  = "node.serviceAccount.name"
-    value = "efs-csi-node-sa"
-  }
-
-  dynamic "set" {
-    for_each = var.tags
-    content {
-      name  = "controller.tags.${set.key}"
-      value = set.value
-    }
-  }
-
-  depends_on = [
-    kubernetes_service_account.eks_efs_controller_sa,
-    kubernetes_service_account.eks_efs_node_sa,
   ]
 }
 
@@ -521,13 +423,11 @@ resource "null_resource" "eks_nvidia_device_plugin" {
     command = "kubectl --context='${var.cluster_name}' apply --filename='https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v${var.nvidia_device_plugin_version}/nvidia-device-plugin.yml'"
   }
   depends_on = [
-    kubernetes_service_account.eks_lb_controller,
+    helm_release.aws_lb_controller,
   ]
 }
 
-
 ## cert-manager
-
 module "cert_manager_irsa" {
   count   = local.cert_manager ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -581,30 +481,24 @@ resource "aws_iam_role_policy_attachment" "cert_manager" {
   ]
 }
 
-# cert-manager's CRDs are installed outside the Helm chart so resources won't
-# be removed if the chart is uninstalled.
-resource "null_resource" "cert_manager_crds" {
-  count = local.cert_manager ? 1 : 0
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' apply --filename='https://github.com/cert-manager/cert-manager/releases/download/v${var.cert_manager_version}/cert-manager.crds.yaml'"
-  }
-  depends_on = [
-    null_resource.eks_kubeconfig,
-  ]
-}
-
 resource "helm_release" "cert_manager" {
   count            = local.cert_manager ? 1 : 0
   name             = "cert-manager"
-  chart            = "https://charts.jetstack.io/charts/cert-manager-v${var.cert_manager_version}.tgz"
-  create_namespace = true
   namespace        = "cert-manager"
+  create_namespace = true
+  chart            = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  version          = "v${var.cert_manager_version}"
+  keyring          = "${path.module}/cert-manager-keyring.gpg"
+  verify           = var.helm_verify
 
-  # Set up values so that service account has correct annotations and that the
-  # pod's security context has permissions to read the account token:
+  # Set up values so CRDs are installed with the chart, the service account has
+  # correct annotations, and that the pod's security context has permissions
+  # to read the account token:
   # https://cert-manager.io/docs/configuration/acme/dns01/route53/#service-annotation
   values = [
     yamlencode({
+      "installCRDs" = true
       "securityContext" = {
         "fsGroup" = 1001
       }
@@ -618,6 +512,5 @@ resource "helm_release" "cert_manager" {
 
   depends_on = [
     module.cert_manager_irsa[0],
-    null_resource.cert_manager_crds[0],
   ]
 }

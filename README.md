@@ -25,8 +25,7 @@ locals {
   vpc_cidr       = "10.100.0.0/16"
   vpc_subnets    = cidrsubnets(local.vpc_cidr, 6, 6, 4, 4)
 
-  private_subnets         = slice(local.vpc_subnets, 2, 4)
-  private_node_defaults   = {
+  node_group_defaults = {
     block_device_mappings = {
       root = {
         device_name = "/dev/xvda"
@@ -37,52 +36,41 @@ locals {
         }
       }
     }
-    instance_types = ["m6i.2xlarge"]
+    instance_types = ["m6a.2xlarge"]
     labels = {
       "network" = "private"
     }
   }
 
-  public_subnets       = slice(local.vpc_subnets, 0, 2)
-  public_node_defaults = {
-    block_device_mappings = {
-      root = {
-        device_name = "/dev/xvda"
-        ebs = {
-          delete_on_termination = true
-          volume_size           = 20
-          volume_type           = "gp3"
-        }
-      }
-    }
-    instance_types  = ["t3a.large"]
-    labels = {
-      "network" = "public"
-    }
-  }
+  private_subnets = slice(local.vpc_subnets, 2, 4)
+  public_subnets  = slice(local.vpc_subnets, 0, 2)
 }
 
 module "eks_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.14.0"
+  version = "3.19.0"
 
   azs  = local.vpc_azs
   cidr = local.vpc_cidr
   name = local.cluster_name
 
-  enable_nat_gateway     = true
-  single_nat_gateway     = false
-  one_nat_gateway_per_az = false
+  enable_nat_gateway            = true
+  single_nat_gateway            = false
+  manage_default_security_group = true
+  map_public_ip_on_launch       = false
+  one_nat_gateway_per_az        = false
 
   private_subnets = local.private_subnets
   public_subnets  = local.public_subnets
 
   # These additional tags are necessary to create ALB/NLBs dynamically.
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = "1"
   }
   public_subnet_tags = {
-    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = "1"
   }
 }
 
@@ -101,22 +89,10 @@ module "eks" {
   iam_role_attach_cni_policy = true
 
   eks_managed_node_groups = {
-    private = merge(
-      local.private_node_defaults,
+    default = merge(
+      local.node_group_defaults,
       {
-        subnet_ids = [module.eks_vpc.private_subnets[0]]
-      }
-    )
-    public-1 = merge(
-      local.public_node_defaults,
-      {
-        subnet_ids = [module.eks_vpc.public_subnets[0]]
-      }
-    )
-    public-2 = merge(
-      local.public_node_defaults,
-      {
-        subnet_ids = [module.eks_vpc.public_subnets[1]]
+        subnet_ids = [module.eks_vpc.private_subnets]
       }
     )
   }
@@ -125,4 +101,5 @@ module "eks" {
 
 ## Known Issues
 
-Persistent volumes or ALBs (`Ingress`) or NLBs (`LoadBalancer`) that aren't deleted prior to cluster removal will persist.  In the case of ALB/NLBs their dynamic security groups may prevent deletion of the VPC associated with the EKS cluster.
+* Persistent volumes, ALBs (`Ingress`), or NLBs (`LoadBalancer`) that aren't deleted prior to cluster removal will persist.
+* In the case of ALB/NLBs, their dynamic security groups may prevent deletion of the VPC associated with the EKS cluster.
