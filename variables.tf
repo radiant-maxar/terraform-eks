@@ -95,13 +95,13 @@ variable "default_max_size" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.17.0"
+  default     = "2.17.1"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.3.8"
+  default     = "2.4.0"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -109,6 +109,12 @@ variable "efs_csi_driver_version" {
 variable "eks_managed_node_groups" {
   description = "Managed node groups for the EKS cluster."
   type        = any
+}
+
+variable "helm_verify" {
+  default     = true
+  description = "Whether to verify GPG signatures for Helm charts that provide them."
+  type        = bool
 }
 
 variable "kubernetes_version" {
@@ -124,7 +130,7 @@ variable "iam_role_attach_cni_policy" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.4.7"
+  default     = "1.4.8"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
