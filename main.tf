@@ -348,10 +348,16 @@ resource "kubernetes_storage_class" "eks_ebs_storage_class" {
 }
 
 # Don't want gp2 storageclass set as default.
-resource "null_resource" "eks_disable_gp2" {
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' patch storageclass gp2 -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'"
+resource "kubernetes_annotations" "eks_disable_gp2" {
+  api_version = "storage.k8s.io/v1"
+  kind        = "StorageClass"
+  metadata {
+    name = "gp2"
   }
+  annotations = {
+    "storageclass.kubernetes.io/is-default-class" = "false"
+  }
+
   depends_on = [
     kubernetes_storage_class.eks_ebs_storage_class
   ]
