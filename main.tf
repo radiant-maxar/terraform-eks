@@ -41,7 +41,7 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.10.0"
+  version = "19.10.1"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
@@ -113,7 +113,7 @@ resource "null_resource" "eks_kubeconfig" {
 # Authorize Amazon Load Balancer Controller
 module "eks_lb_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.12.0"
+  version = "5.14.2"
 
   role_name                              = "${var.cluster_name}-lb-role"
   attach_load_balancer_controller_policy = true
@@ -131,7 +131,7 @@ module "eks_lb_irsa" {
 # Authorize VPC CNI via IRSA.
 module "eks_vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.12.0"
+  version = "5.14.2"
 
   role_name             = "${var.cluster_name}-vpc-cni-role"
   attach_vpc_cni_policy = true
@@ -150,7 +150,7 @@ module "eks_vpc_cni_irsa" {
 # Allow PVCs backed by EBS
 module "eks_ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.12.0"
+  version = "5.14.2"
 
   role_name             = "${var.cluster_name}-ebs-csi-role"
   attach_ebs_csi_policy = true
@@ -168,7 +168,7 @@ module "eks_ebs_csi_irsa" {
 # Allow PVCs backed by EFS
 module "eks_efs_csi_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.12.0"
+  version = "5.14.2"
 
   role_name             = "${var.cluster_name}-efs-csi-controller-role"
   attach_efs_csi_policy = true
@@ -186,7 +186,7 @@ module "eks_efs_csi_controller_irsa" {
 
 module "eks_efs_csi_node_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.12.0"
+  version = "5.14.2"
 
   role_name = "${var.cluster_name}-efs-csi-node-role"
   oidc_providers = {
@@ -438,7 +438,7 @@ resource "null_resource" "eks_nvidia_device_plugin" {
 module "cert_manager_irsa" {
   count   = local.cert_manager ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.12.0"
+  version = "5.14.2"
 
   role_name = "${var.cluster_name}-cert-manager-role"
 
