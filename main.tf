@@ -357,6 +357,7 @@ resource "kubernetes_annotations" "eks_disable_gp2" {
   annotations = {
     "storageclass.kubernetes.io/is-default-class" = "false"
   }
+  force = true
 
   depends_on = [
     kubernetes_storage_class.eks_ebs_storage_class
