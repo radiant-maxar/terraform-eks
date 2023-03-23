@@ -95,13 +95,13 @@ variable "default_max_size" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.17.1"
+  default     = "2.17.2"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.4.0"
+  default     = "2.4.1"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
