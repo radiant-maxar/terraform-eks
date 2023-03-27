@@ -519,5 +519,6 @@ resource "helm_release" "cert_manager" {
 
   depends_on = [
     module.cert_manager_irsa[0],
+    module.eks,
   ]
 }
