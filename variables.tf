@@ -118,7 +118,7 @@ variable "helm_verify" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.26"
+  default     = "1.27"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
