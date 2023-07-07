@@ -95,13 +95,13 @@ variable "default_max_size" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.18.0"
+  default     = "2.20.0"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.4.1"
+  default     = "2.4.6"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -130,7 +130,7 @@ variable "iam_role_attach_cni_policy" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.5.2"
+  default     = "1.5.4"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
