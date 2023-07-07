@@ -177,7 +177,7 @@ variable "nvidia_device_plugin" {
 }
 
 variable "nvidia_device_plugin_version" {
-  default     = "0.13.0"
+  default     = "0.14.0"
   description = "Version of the Nvidia device plugin to install."
   type        = string
 }
