@@ -101,7 +101,7 @@ variable "ebs_csi_driver_version" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.4.6"
+  default     = "2.4.7"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
