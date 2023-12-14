@@ -129,6 +129,18 @@ variable "iam_role_attach_cni_policy" {
   type        = bool
 }
 
+variable "kms_manage" {
+  default     = false
+  description = "Manage EKS KMS resource instead of the AWS module"
+  type        = bool
+}
+
+variable "kms_key_deletion_window_in_days" {
+  description = "The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key. If you specify a value, it must be between `7` and `30`, inclusive."
+  type        = number
+  default     = 10
+}
+
 variable "lb_controller_version" {
   default     = "1.6.1"
   description = "Version of the AWS Load Balancer Controller chart to install."

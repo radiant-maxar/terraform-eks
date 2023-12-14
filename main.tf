@@ -13,13 +13,6 @@ locals {
   ]
 }
 
-resource "aws_kms_key" "this" {
-  deletion_window_in_days = 10
-  description             = "KMS Key for EKS Secrets"
-  enable_key_rotation     = true
-  tags                    = var.tags
-}
-
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
@@ -45,10 +38,13 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   }
   cluster_addons_timeouts   = var.cluster_addons_timeouts
   cluster_enabled_log_types = var.cluster_enabled_log_types
-  cluster_encryption_config = {
+
+  cluster_encryption_config = var.kms_manage ? {
     provider_key_arn = aws_kms_key.this.arn
     resources        = ["secrets"]
-  }
+  } : { resources = ["secrets"] }
+  create_kms_key                  = var.kms_manage ? false : true
+  kms_key_deletion_window_in_days = var.kms_key_deletion_window_in_days
 
   cluster_endpoint_private_access         = var.cluster_endpoint_private_access
   cluster_endpoint_public_access          = var.cluster_endpoint_public_access
@@ -56,7 +52,6 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
   aws_auth_roles            = local.aws_auth_roles
-  create_kms_key            = false
   manage_aws_auth_configmap = true
   enable_irsa               = true
   subnet_ids                = concat(var.public_subnets, var.private_subnets)
