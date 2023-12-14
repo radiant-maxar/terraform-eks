@@ -95,13 +95,13 @@ variable "default_max_size" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.24.0"
+  default     = "2.25.0"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.5.0"
+  default     = "2.5.2"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -177,7 +177,7 @@ variable "nvidia_device_plugin" {
 }
 
 variable "nvidia_device_plugin_version" {
-  default     = "0.14.1"
+  default     = "0.14.3"
   description = "Version of the Nvidia device plugin to install."
   type        = string
 }
