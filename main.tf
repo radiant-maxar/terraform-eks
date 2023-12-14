@@ -41,7 +41,7 @@ resource "aws_security_group" "eks_efs_sg" {
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.17.2"
+  version = "19.21.0"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
