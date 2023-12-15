@@ -101,7 +101,7 @@ resource "helm_release" "aws_efs_csi_driver" {
       "controller" = {
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
           }
         }
         "tags" = var.tags
@@ -112,7 +112,7 @@ resource "helm_release" "aws_efs_csi_driver" {
       "node" = {
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
           }
         }
       }

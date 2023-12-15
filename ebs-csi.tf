@@ -31,7 +31,7 @@ resource "helm_release" "aws_ebs_csi_driver" {
         "extraVolumeTags" = var.tags
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
           }
         }
       }

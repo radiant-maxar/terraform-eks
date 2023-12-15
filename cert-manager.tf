@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "cert_manager" {
     actions = [
       "route53:GetChange"
     ]
-    resources = ["arn:aws:route53:::change/*"]
+    resources = ["arn:${local.aws_partition}:route53:::change/*"]
   }
 
   statement {
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "cert_manager" {
       "route53:ChangeResourceRecordSets",
       "route53:ListResourceRecordSets",
     ]
-    resources = ["arn:aws:route53:::hostedzone/${var.cert_manager_route53_zone_id}"]
+    resources = ["arn:${local.aws_partition}:route53:::hostedzone/${var.cert_manager_route53_zone_id}"]
   }
 }
 
@@ -79,7 +79,7 @@ resource "helm_release" "cert_manager" {
       }
       "serviceAccount" = {
         "annotations" = {
-          "eks.amazonaws.com/role-arn" = "arn:aws:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role"
+          "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role"
         }
       }
     })

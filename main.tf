@@ -4,10 +4,11 @@ data "aws_region" "current" {}
 
 locals {
   aws_account_id = data.aws_caller_identity.current.account_id
+  aws_partition  = data.aws_partition.current.partition
   aws_region     = data.aws_region.current.name
   aws_auth_roles = [
     for role in var.system_masters_roles : {
-      rolearn  = "arn:aws:iam::${local.aws_account_id}:role/${role}"
+      rolearn  = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${role}"
       username = role
       groups   = ["system:masters"]
     }
