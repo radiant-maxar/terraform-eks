@@ -1,9 +1,10 @@
-data "aws_caller_identity" "default" {}
-data "aws_region" "default" {}
+data "aws_caller_identity" "current" {}
+data "aws_partition" "current" {}
+data "aws_region" "current" {}
 
 locals {
-  aws_account_id = data.aws_caller_identity.default.account_id
-  aws_region     = data.aws_region.default.name
+  aws_account_id = data.aws_caller_identity.current.account_id
+  aws_region     = data.aws_region.current.name
   aws_auth_roles = [
     for role in var.system_masters_roles : {
       rolearn  = "arn:aws:iam::${local.aws_account_id}:role/${role}"

@@ -17,11 +17,11 @@ This module provides an opinionated way to configure an AWS EKS cluster using:
 Here's an example using a VPC defined using the [terraform-aws-vpc](https://github.com/terraform-aws-modules/terraform-aws-vpc) module:
 
 ```
-data "aws_availability_zones" "default" {}
+data "aws_availability_zones" "current" {}
 
 locals {
   cluster_name   = "test-eks"
-  vpc_azs        = slice(data.aws_availability_zones.default.names, 0, 2)
+  vpc_azs        = slice(data.aws_availability_zones.current.names, 0, 2)
   vpc_cidr       = "10.100.0.0/16"
   vpc_subnets    = cidrsubnets(local.vpc_cidr, 6, 6, 4, 4)
 
