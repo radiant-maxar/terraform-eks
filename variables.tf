@@ -141,6 +141,12 @@ variable "kms_key_deletion_window_in_days" {
   default     = 10
 }
 
+variable "kms_key_enable_default_policy" {
+  description = "Specifies whether to enable the default key policy. Defaults to `true` to workaround EFS permissions."
+  type        = bool
+  default     = true
+}
+
 variable "lb_controller_version" {
   default     = "1.6.1"
   description = "Version of the AWS Load Balancer Controller chart to install."

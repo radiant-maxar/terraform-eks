@@ -47,6 +47,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   } : { resources = ["secrets"] }
   create_kms_key                  = var.kms_manage ? false : true
   kms_key_deletion_window_in_days = var.kms_key_deletion_window_in_days
+  kms_key_enable_default_policy   = var.kms_key_enable_default_policy
 
   cluster_endpoint_private_access         = var.cluster_endpoint_private_access
   cluster_endpoint_public_access          = var.cluster_endpoint_public_access
