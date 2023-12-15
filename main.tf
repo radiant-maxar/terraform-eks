@@ -79,6 +79,9 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   }
   eks_managed_node_groups = var.eks_managed_node_groups
 
+  fargate_profiles         = var.fargate_profiles
+  fargate_profile_defaults = var.fargate_profile_defaults
+
   node_security_group_tags = var.node_security_group_tags
   tags                     = var.tags
 }

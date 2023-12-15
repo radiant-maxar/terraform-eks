@@ -119,8 +119,21 @@ variable "efs_csi_driver_version" {
 }
 
 variable "eks_managed_node_groups" {
-  description = "Managed node groups for the EKS cluster."
-  type        = any
+  description = "Map of managed node groups for the EKS cluster."
+  type        = map(any)
+  default     = {}
+}
+
+variable "fargate_profiles" {
+  description = "Map of Fargate Profile definitions to create"
+  type        = map(any)
+  default     = {}
+}
+
+variable "fargate_profile_defaults" {
+  description = "Map of Fargate Profile default configurations"
+  type        = map(any)
+  default     = {}
 }
 
 variable "helm_verify" {
