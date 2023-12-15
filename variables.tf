@@ -67,6 +67,18 @@ variable "cluster_security_group_additional_rules" {
   default     = {}
 }
 
+variable "create_cluster_security_group" {
+  description = "Determines if a security group is created for the cluster. Note: the EKS service creates a primary security group for the cluster by default"
+  type        = bool
+  default     = true
+}
+
+variable "create_node_security_group" {
+  description = "Determines whether to create a security group for the node groups or use the existing `node_security_group_id`"
+  type        = bool
+  default     = true
+}
+
 # The ECR repository is not the same for every region, in particular
 # those for govcloud:
 #   https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html
