@@ -1,3 +1,9 @@
+variable "aws_auth_roles" {
+  description = "List of role maps to add to the aws-auth configmap"
+  type        = list(any)
+  default     = []
+}
+
 variable "cert_manager_version" {
   default     = "1.13.3"
   description = "Version of cert-manager to install."
