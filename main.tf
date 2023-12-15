@@ -23,21 +23,24 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
 
-  cluster_addons = {
-    coredns = {
-      most_recent = var.cluster_addons_most_recent
-      preserve    = true
-    }
-    kube-proxy = {
-      most_recent = var.cluster_addons_most_recent
-      preserve    = true
-    }
-    vpc-cni = {
-      most_recent              = var.cluster_addons_most_recent
-      preserve                 = true
-      service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
-    }
-  }
+  cluster_addons = merge(
+    {
+      coredns = {
+        most_recent = var.cluster_addons_most_recent
+        preserve    = true
+      }
+      kube-proxy = {
+        most_recent = var.cluster_addons_most_recent
+        preserve    = true
+      }
+      vpc-cni = {
+        most_recent              = var.cluster_addons_most_recent
+        preserve                 = true
+        service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
+      }
+    },
+    var.cluster_addons_overrides
+  )
   cluster_addons_timeouts   = var.cluster_addons_timeouts
   cluster_enabled_log_types = var.cluster_enabled_log_types
 

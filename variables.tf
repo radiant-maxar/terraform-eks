@@ -16,6 +16,12 @@ variable "cluster_addons_most_recent" {
   default     = true
 }
 
+variable "cluster_addons_overrides" {
+  description = "Override parameters for cluster addons."
+  type        = map(any)
+  default     = {}
+}
+
 variable "cluster_addons_timeouts" {
   description = "Create, update, and delete timeout configurations for the cluster addons"
   type        = map(string)
@@ -53,6 +59,12 @@ variable "cluster_endpoint_public_access_cidrs" {
 variable "cluster_name" {
   description = "Unique name for the EKS cluster."
   type        = string
+}
+
+variable "cluster_security_group_additional_rules" {
+  description = "Additional security group rules to add to the cluster security group created."
+  type        = map(any)
+  default     = {}
 }
 
 # The ECR repository is not the same for every region, in particular
@@ -151,12 +163,6 @@ variable "lb_controller_version" {
   default     = "1.6.1"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
-}
-
-variable "cluster_security_group_additional_rules" {
-  description = "Additional security group rules to add to the cluster security group created."
-  type        = any
-  default     = {}
 }
 
 variable "node_security_group_additional_rules" {
