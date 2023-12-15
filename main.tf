@@ -39,8 +39,10 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
 
   cluster_addons = merge(
     {
+      # Configure CoreDNS to run on Fargate when profiles are provided.
       coredns = {
-        most_recent = var.cluster_addons_most_recent
+        configuration_values = length(var.fargate_profiles) > 0 ? jsonencode({ computeType = "Fargate" }) : ""
+        most_recent          = var.cluster_addons_most_recent
       }
       kube-proxy = {
         most_recent = var.cluster_addons_most_recent
