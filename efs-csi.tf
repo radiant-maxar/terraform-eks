@@ -55,6 +55,7 @@ data "aws_iam_policy_document" "eks_efs_csi_node" {
     actions = [
       "elasticfilesystem:DescribeMountTargets",
       "ec2:DescribeAvailabilityZones",
+      "ec2:DescribeNetworkInterfaceAttribute",
     ]
     resources = ["*"] # tfsec:ignore:aws-iam-no-policy-wildcards
   }
