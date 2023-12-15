@@ -20,7 +20,7 @@ output "eks_managed_node_groups" {
 
 output "kms_key_arn" {
   description = "The Amazon Resource Name (ARN) of the KMS key for the EKS cluster."
-  value       = aws_kms_key.this.arn
+  value       = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
 }
 
 output "node_security_group_arn" {

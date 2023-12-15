@@ -40,7 +40,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_enabled_log_types = var.cluster_enabled_log_types
 
   cluster_encryption_config = var.kms_manage ? {
-    provider_key_arn = aws_kms_key.this.arn
+    provider_key_arn = aws_kms_key.this[0].arn
     resources        = ["secrets"]
   } : { resources = ["secrets"] }
   create_kms_key                  = var.kms_manage ? false : true
