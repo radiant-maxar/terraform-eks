@@ -160,16 +160,22 @@ variable "helm_verify" {
   type        = bool
 }
 
-variable "kubernetes_version" {
-  default     = "1.28"
-  description = "Kubernetes version to use for the EKS cluster."
-  type        = string
-}
-
 variable "iam_role_attach_cni_policy" {
   default     = true
   description = "Whether to attach CNI policy to EKS Node groups."
   type        = bool
+}
+
+variable "karpenter" {
+  description = "Whether to use Karpenter with the EKS cluster."
+  type        = bool
+  default     = false
+}
+
+variable "karpenter_version" {
+  description = "Version of Karpenter Helm chart to install on the EKS cluster."
+  type        = string
+  default     = "0.32.3"
 }
 
 variable "kms_manage" {
@@ -188,6 +194,12 @@ variable "kms_key_enable_default_policy" {
   description = "Specifies whether to enable the default key policy. Defaults to `true` to workaround EFS permissions."
   type        = bool
   default     = true
+}
+
+variable "kubernetes_version" {
+  default     = "1.28"
+  description = "Kubernetes version to use for the EKS cluster."
+  type        = string
 }
 
 variable "lb_controller_version" {

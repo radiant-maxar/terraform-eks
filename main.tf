@@ -6,6 +6,16 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
   aws_partition  = data.aws_partition.current.partition
   aws_region     = data.aws_region.current.name
+  aws_auth_karpenter_roles = var.karpenter ? [
+    {
+      rolearn  = module.karpenter[0].role_arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups = [
+        "system:bootstrappers",
+        "system:nodes",
+      ]
+    },
+  ] : []
   aws_auth_roles = concat(
     [
       for role in var.system_masters_roles : {
@@ -14,6 +24,7 @@ locals {
         groups   = ["system:masters"]
       }
     ],
+    local.aws_auth_karpenter_roles,
     var.aws_auth_roles
   )
 }
@@ -85,7 +96,11 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   fargate_profile_defaults = var.fargate_profile_defaults
 
   node_security_group_tags = var.node_security_group_tags
-  tags                     = var.tags
+
+  tags = merge(
+    var.tags,
+    var.karpenter ? { "karpenter.sh/discovery" = var.cluster_name } : {}
+  )
 }
 
 # Add EKS to default kubeconfig and set context for it.
