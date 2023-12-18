@@ -1,5 +1,6 @@
 ## EFS CSI Storage Driver
 resource "aws_security_group" "eks_efs_sg" {
+  count       = var.efs_csi_driver ? 1 : 0
   name        = "${var.cluster_name}-efs-sg"
   description = "Security group for EFS clients in EKS VPC"
   vpc_id      = var.vpc_id
@@ -17,6 +18,7 @@ resource "aws_security_group" "eks_efs_sg" {
 
 # Allow PVCs backed by EFS
 module "eks_efs_csi_controller_irsa" {
+  count   = var.efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.32.1"
 
@@ -35,6 +37,7 @@ module "eks_efs_csi_controller_irsa" {
 }
 
 module "eks_efs_csi_node_irsa" {
+  count   = var.efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.32.1"
 
@@ -51,6 +54,7 @@ module "eks_efs_csi_node_irsa" {
 }
 
 data "aws_iam_policy_document" "eks_efs_csi_node" {
+  count = var.efs_csi_driver ? 1 : 0
   statement {
     actions = [
       "elasticfilesystem:DescribeMountTargets",
@@ -61,21 +65,24 @@ data "aws_iam_policy_document" "eks_efs_csi_node" {
 }
 
 resource "aws_iam_policy" "eks_efs_csi_node" {
+  count       = var.efs_csi_driver ? 1 : 0
   name        = "AmazonEKS_EFS_CSI_Node_Policy-${var.cluster_name}"
   description = "Provides node permissions to use the EFS CSI driver"
-  policy      = data.aws_iam_policy_document.eks_efs_csi_node.json
+  policy      = data.aws_iam_policy_document.eks_efs_csi_node[0].json
   tags        = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "eks_efs_csi_node" {
+  count      = var.efs_csi_driver ? 1 : 0
   role       = "${var.cluster_name}-efs-csi-node-role"
-  policy_arn = aws_iam_policy.eks_efs_csi_node.arn
+  policy_arn = aws_iam_policy.eks_efs_csi_node[0].arn
   depends_on = [
-    module.eks_efs_csi_node_irsa
+    module.eks_efs_csi_node_irsa[0]
   ]
 }
 
 resource "aws_efs_file_system" "eks_efs" {
+  count          = var.efs_csi_driver ? 1 : 0
   creation_token = "${var.cluster_name}-efs"
   encrypted      = true
   kms_key_id     = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
@@ -83,13 +90,14 @@ resource "aws_efs_file_system" "eks_efs" {
 }
 
 resource "aws_efs_mount_target" "eks_efs_private" {
-  count           = length(var.private_subnets)
-  file_system_id  = aws_efs_file_system.eks_efs.id
+  count           = var.efs_csi_driver ? length(var.private_subnets) : 0
+  file_system_id  = aws_efs_file_system.eks_efs[0].id
   subnet_id       = var.private_subnets[count.index]
-  security_groups = [aws_security_group.eks_efs_sg.id]
+  security_groups = aws_security_group.eks_efs_sg[*].id
 }
 
 resource "helm_release" "aws_efs_csi_driver" {
+  count      = var.efs_csi_driver ? 1 : 0
   name       = "aws-efs-csi-driver"
   namespace  = "kube-system"
   chart      = "aws-efs-csi-driver"
@@ -120,7 +128,7 @@ resource "helm_release" "aws_efs_csi_driver" {
   ]
 
   depends_on = [
-    module.eks_efs_csi_controller_irsa,
+    module.eks_efs_csi_controller_irsa[0],
     module.eks,
   ]
 }
@@ -135,7 +143,7 @@ resource "kubernetes_storage_class" "eks_efs_storage_class" {
   mount_options = []
   parameters = {
     "provisioningMode" = "efs-ap"
-    "fileSystemId"     = aws_efs_file_system.eks_efs.id
+    "fileSystemId"     = aws_efs_file_system.eks_efs[0].id
     "directoryPerms"   = "755"
     "uid"              = "0"
     "gid"              = "0"
@@ -143,6 +151,6 @@ resource "kubernetes_storage_class" "eks_efs_storage_class" {
   storage_provisioner = "efs.csi.aws.com"
 
   depends_on = [
-    helm_release.aws_efs_csi_driver,
+    helm_release.aws_efs_csi_driver[0],
   ]
 }

@@ -130,6 +130,12 @@ variable "ebs_csi_driver_version" {
   type        = string
 }
 
+variable "efs_csi_driver" {
+  description = "Install and configure the EFS CSI storage driver."
+  type        = bool
+  default     = true
+}
+
 variable "efs_csi_driver_version" {
   default     = "2.5.2"
   description = "Version of the EFS CSI storage driver to install."
