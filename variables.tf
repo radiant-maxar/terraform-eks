@@ -124,6 +124,12 @@ variable "default_max_size" {
   type        = number
 }
 
+variable "ebs_csi_driver" {
+  description = "Install and configure the EBS CSI storage driver."
+  type        = bool
+  default     = true
+}
+
 variable "ebs_csi_driver_version" {
   default     = "2.25.0"
   description = "Version of the EFS CSI storage driver to install."
@@ -206,6 +212,12 @@ variable "kubernetes_version" {
   default     = "1.28"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
+}
+
+variable "lb_controller" {
+  description = "Install and configure the AWS Load Balancer controller."
+  type        = bool
+  default     = true
 }
 
 variable "lb_controller_version" {

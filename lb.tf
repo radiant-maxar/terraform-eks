@@ -2,6 +2,7 @@
 
 # Authorize Amazon Load Balancer Controller
 module "eks_lb_irsa" {
+  count   = var.lb_controller ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.32.1"
 
@@ -19,6 +20,7 @@ module "eks_lb_irsa" {
 }
 
 resource "helm_release" "aws_lb_controller" {
+  count      = var.lb_controller ? 1 : 0
   name       = "aws-load-balancer-controller"
   namespace  = "kube-system"
   chart      = "aws-load-balancer-controller"
@@ -42,7 +44,7 @@ resource "helm_release" "aws_lb_controller" {
   ]
 
   depends_on = [
-    module.eks_lb_irsa,
+    module.eks_lb_irsa[0],
     module.eks,
   ]
 }
