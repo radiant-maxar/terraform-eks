@@ -104,25 +104,28 @@ resource "helm_release" "aws_efs_csi_driver" {
   repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver"
   version    = var.efs_csi_driver_version
 
-  set {
-    name  = "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
-  }
-
-  set {
-    name  = "controller.tags"
-    value = var.tags
-  }
-
-  set {
-    name  = "image.repository"
-    value = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
-  }
-
-  set {
-    name  = "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
-  }
+  values = [
+    yamlencode({
+      "controller" = {
+        "serviceAccount" = {
+          "annotations" = {
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
+          }
+        }
+        "tags" = var.tags
+      }
+      "image" = {
+        "repository" = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
+      }
+      "node" = {
+        "serviceAccount" = {
+          "annotations" = {
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
+          }
+        }
+      }
+    })
+  ]
 
   depends_on = [
     module.eks_efs_csi_controller_irsa[0],
