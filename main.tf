@@ -44,6 +44,9 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
         configuration_values = length(var.fargate_profiles) > 0 ? jsonencode({ computeType = "Fargate" }) : ""
         most_recent          = var.cluster_addons_most_recent
       }
+      eks-pod-identity-agent = {
+        most_recent = var.cluster_addons_most_recent
+      }
       kube-proxy = {
         most_recent = var.cluster_addons_most_recent
       }
