@@ -134,6 +134,8 @@ resource "helm_release" "aws_efs_csi_driver" {
 }
 
 resource "kubernetes_storage_class" "eks_efs_storage_class" {
+  count = var.efs_csi_driver ? 1 : 0
+
   metadata {
     annotations = {}
     name        = "efs-sc"
