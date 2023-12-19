@@ -18,6 +18,16 @@ output "eks_managed_node_groups" {
   value       = module.eks.eks_managed_node_groups
 }
 
+output "karpenter_role_name" {
+  description = "The name of the Karpenter IAM role"
+  value       = var.karpenter ? module.karpenter[0].role_name : null
+}
+
+output "karpenter_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the Karpenter IAM role"
+  value       = var.karpenter ? module.karpenter[0].role_arn : null
+}
+
 output "kms_key_arn" {
   description = "The Amazon Resource Name (ARN) of the KMS key for the EKS cluster."
   value       = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
