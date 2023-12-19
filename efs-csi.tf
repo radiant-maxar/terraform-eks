@@ -20,7 +20,7 @@ resource "aws_security_group" "eks_efs_sg" {
 module "eks_efs_csi_controller_irsa" {
   count   = var.efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.32.1"
+  version = "5.33.0"
 
   role_name             = "${var.cluster_name}-efs-csi-controller-role"
   attach_efs_csi_policy = true
@@ -39,7 +39,7 @@ module "eks_efs_csi_controller_irsa" {
 module "eks_efs_csi_node_irsa" {
   count   = var.efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.32.1"
+  version = "5.33.0"
 
   role_name = "${var.cluster_name}-efs-csi-node-role"
   oidc_providers = {
