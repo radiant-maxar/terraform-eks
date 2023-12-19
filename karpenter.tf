@@ -1,3 +1,13 @@
+# Required to access Karpenter artifacts in AWS public repositories.
+provider "aws" {
+  region = "us-east-1"
+  alias  = "virginia"
+}
+
+data "aws_ecrpublic_authorization_token" "current" {
+  provider = aws.virginia
+}
+
 module "karpenter" {
   count   = var.karpenter ? 1 : 0
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
@@ -33,6 +43,11 @@ resource "helm_release" "karpenter" {
   repository = "oci://public.ecr.aws/karpenter"
   chart      = "karpenter"
   version    = "v${var.karpenter_version}"
+
+  # XXX: Unfortunately, AWS ECR credentials leads to resource churn
+  #      as the password will change.
+  repository_username = data.aws_ecrpublic_authorization_token.current.user_name
+  repository_password = data.aws_ecrpublic_authorization_token.current.password
 
   values = [
     yamlencode({
