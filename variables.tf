@@ -261,15 +261,15 @@ variable "node_security_group_tags" {
   default     = {}
 }
 
-variable "nvidia_device_plugin" {
+variable "nvidia_gpu_operator" {
   default     = false
-  description = "Whether to install the Nvidia device plugin driver"
+  description = "Whether to install the NVIDIA GPU Operator."
   type        = bool
 }
 
-variable "nvidia_device_plugin_version" {
-  default     = "0.14.3"
-  description = "Version of the Nvidia device plugin to install."
+variable "nvidia_gpu_operator_version" {
+  default     = "23.9.1"
+  description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
 }
 

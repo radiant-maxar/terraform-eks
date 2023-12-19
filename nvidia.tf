@@ -1,10 +1,15 @@
-## Nvidia Device Plugin for GPU support
-resource "null_resource" "eks_nvidia_device_plugin" {
-  count = var.nvidia_device_plugin ? 1 : 0
-  provisioner "local-exec" {
-    command = "kubectl --context='${var.cluster_name}' apply --filename='https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v${var.nvidia_device_plugin_version}/nvidia-device-plugin.yml'"
-  }
+## NVIDIA GPU Operator
+
+resource "helm_release" "nvidia_gpu_operator" {
+  count            = var.nvidia_gpu_operator ? 1 : 0
+  chart            = "gpu-operator"
+  create_namespace = true
+  name             = "gpu-operator"
+  namespace        = "nvidia/gpu-operator"
+  repository       = "https://helm.ngc.nvidia.com/nvidia"
+  version          = "v${var.nvidia_gpu_operator_version}"
+
   depends_on = [
-    helm_release.aws_lb_controller,
+    module.eks,
   ]
 }
