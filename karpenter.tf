@@ -28,6 +28,11 @@ resource "helm_release" "karpenter_crd" {
   chart      = "karpenter-crd"
   version    = "v${var.karpenter_version}"
 
+  # XXX: Unfortunately, AWS ECR credentials leads to resource churn
+  #      as the password will change.
+  repository_username = data.aws_ecrpublic_authorization_token.current.user_name
+  repository_password = data.aws_ecrpublic_authorization_token.current.password
+
   depends_on = [
     module.eks,
     module.karpenter[0],
