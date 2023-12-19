@@ -155,13 +155,13 @@ variable "eks_managed_node_groups" {
 }
 
 variable "fargate_profiles" {
-  description = "Map of Fargate Profile definitions to create"
+  description = "Map of Fargate Profile definitions to create."
   type        = map(any)
   default     = {}
 }
 
 variable "fargate_profile_defaults" {
-  description = "Map of Fargate Profile default configurations"
+  description = "Map of Fargate Profile default configurations."
   type        = map(any)
   default     = {}
 }
@@ -182,6 +182,12 @@ variable "karpenter" {
   description = "Whether to use Karpenter with the EKS cluster."
   type        = bool
   default     = false
+}
+
+variable "karpenter_values" {
+  description = "Additional custom values to use when installing the Karpenter Helm chart."
+  type        = map(any)
+  default     = {}
 }
 
 variable "karpenter_version" {

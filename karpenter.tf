@@ -8,6 +8,22 @@ module "karpenter" {
   tags                   = var.tags
 }
 
+resource "helm_release" "karpenter_crd" {
+  count            = var.karpenter ? 1 : 0
+  namespace        = "karpenter"
+  create_namespace = true
+
+  name       = "karpenter-crd"
+  repository = "oci://public.ecr.aws/karpenter"
+  chart      = "karpenter-crd"
+  version    = "v${var.karpenter_version}"
+
+  depends_on = [
+    module.eks,
+    module.karpenter[0],
+  ]
+}
+
 resource "helm_release" "karpenter" {
   count            = var.karpenter ? 1 : 0
   namespace        = "karpenter"
@@ -18,33 +34,26 @@ resource "helm_release" "karpenter" {
   chart      = "karpenter"
   version    = "v${var.karpenter_version}"
 
-  set {
-    name  = "settings.aws.clusterName"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "settings.aws.clusterEndpoint"
-    value = module.eks.cluster_endpoint
-  }
-
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = module.karpenter[0].irsa_arn
-  }
-
-  set {
-    name  = "settings.aws.defaultInstanceProfile"
-    value = module.karpenter[0].instance_profile_name
-  }
-
-  set {
-    name  = "settings.aws.interruptionQueueName"
-    value = module.karpenter[0].queue_name
-  }
+  values = [
+    yamlencode({
+      "serviceAccount" = {
+        "annotations" = {
+          "eks.amazonaws.com/role-arn" = module.karpenter[0].irsa_arn
+        }
+      }
+      "settings" = {
+        "aws" = {
+          "clusterEndpoint"        = module.eks.cluster_endpoint
+          "clusterName"            = var.cluster_name
+          "defaultInstanceProfile" = module.karpenter[0].instance_profile_name
+          "interruptionQueueName"  = module.karpenter[0].queue_name
+        }
+      }
+    }),
+    yamlencode(var.karpenter_values),
+  ]
 
   depends_on = [
-    module.eks,
-    module.karpenter[0],
+    helm_release.karpenter_crd[0]
   ]
 }
