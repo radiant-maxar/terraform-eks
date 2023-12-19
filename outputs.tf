@@ -18,14 +18,29 @@ output "eks_managed_node_groups" {
   value       = module.eks.eks_managed_node_groups
 }
 
+output "karpenter_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the Karpenter IAM role"
+  value       = var.karpenter ? module.karpenter[0].role_arn : null
+}
+
 output "karpenter_role_name" {
   description = "The name of the Karpenter IAM role"
   value       = var.karpenter ? module.karpenter[0].role_name : null
 }
 
-output "karpenter_role_arn" {
-  description = "The Amazon Resource Name (ARN) specifying the Karpenter IAM role"
-  value       = var.karpenter ? module.karpenter[0].role_arn : null
+output "karpenter_instance_profile_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the Karpenter IAM instance profile"
+  value       = var.karpenter ? module.karpenter[0].instance_profile_arn : null
+}
+
+output "karpenter_instance_profile_id" {
+  description = "The name of the Karpenter IAM instance profile ID"
+  value       = var.karpenter ? module.karpenter[0].instance_profile_id : null
+}
+
+output "karpenter_instance_profile_name" {
+  description = "The name of the Karpenter IAM instance profile nome"
+  value       = var.karpenter ? module.karpenter[0].instance_profile_name : null
 }
 
 output "kms_key_arn" {
