@@ -4,6 +4,12 @@ variable "aws_auth_roles" {
   default     = []
 }
 
+variable "cert_manager_values" {
+  description = "Additional custom values for the cert-manager Helm chart."
+  type        = map(any)
+  default     = {}
+}
+
 variable "cert_manager_version" {
   default     = "1.13.3"
   description = "Version of cert-manager to install."
@@ -130,6 +136,12 @@ variable "ebs_csi_driver" {
   default     = true
 }
 
+variable "ebs_csi_driver_values" {
+  description = "Additional custom values for the EBS CSI Driver Helm chart."
+  type        = map(any)
+  default     = {}
+}
+
 variable "ebs_csi_driver_version" {
   default     = "2.25.0"
   description = "Version of the EFS CSI storage driver to install."
@@ -140,6 +152,12 @@ variable "efs_csi_driver" {
   description = "Install and configure the EFS CSI storage driver."
   type        = bool
   default     = true
+}
+
+variable "efs_csi_driver_values" {
+  description = "Additional custom values for the EFS CSI Driver Helm chart."
+  type        = map(any)
+  default     = {}
 }
 
 variable "efs_csi_driver_version" {
@@ -224,6 +242,12 @@ variable "lb_controller" {
   description = "Install and configure the AWS Load Balancer controller."
   type        = bool
   default     = true
+}
+
+variable "lb_values" {
+  description = "Additional custom values for the AWS Load Balancer Controller Helm chart."
+  type        = map(any)
+  default     = {}
 }
 
 variable "lb_controller_version" {

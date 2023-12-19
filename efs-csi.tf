@@ -124,7 +124,8 @@ resource "helm_release" "aws_efs_csi_driver" {
           }
         }
       }
-    })
+    }),
+    yamlencode(var.efs_csi_driver_values),
   ]
 
   depends_on = [

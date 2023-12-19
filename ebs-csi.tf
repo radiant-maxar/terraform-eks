@@ -40,7 +40,8 @@ resource "helm_release" "aws_ebs_csi_driver" {
       "image" = {
         "repository" = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
       }
-    })
+    }),
+    yamlencode(var.ebs_csi_driver_values),
   ]
 
   depends_on = [

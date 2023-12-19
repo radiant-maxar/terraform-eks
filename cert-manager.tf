@@ -82,7 +82,8 @@ resource "helm_release" "cert_manager" {
           "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role"
         }
       }
-    })
+    }),
+    yamlencode(var.cert_manager_values),
   ]
 
   depends_on = [

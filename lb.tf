@@ -40,7 +40,8 @@ resource "helm_release" "aws_lb_controller" {
         "name" = "aws-load-balancer-controller"
       }
       "vpcId" = var.vpc_id
-    })
+    }),
+    yamlencode(var.lb_values),
   ]
 
   depends_on = [
