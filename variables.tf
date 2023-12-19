@@ -22,6 +22,12 @@ variable "cert_manager_route53_zone_id" {
   type        = string
 }
 
+variable "cluster_addons_coredns" {
+  description = "Indicates whether to install the CoreDNS cluster addon."
+  type        = bool
+  default     = true
+}
+
 variable "cluster_addons_most_recent" {
   description = "Indicates whether to use the most recent version of cluster addons"
   type        = bool

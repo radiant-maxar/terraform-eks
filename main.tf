@@ -38,10 +38,12 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_version = var.kubernetes_version
 
   cluster_addons = merge(
-    {
+    var.cluster_addons_coredns ? {
       coredns = {
         most_recent = var.cluster_addons_most_recent
       }
+    } : {},
+    {
       eks-pod-identity-agent = {
         most_recent = var.cluster_addons_most_recent
       }
