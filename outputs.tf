@@ -18,14 +18,14 @@ output "eks_managed_node_groups" {
   value       = module.eks.eks_managed_node_groups
 }
 
-output "karpenter_irsa_arn" {
-  description = "The Amazon Resource Name (ARN) for the Karpenter IRSA role"
-  value       = var.karpenter ? module.karpenter[0].irsa_arn : null
+output "karpenter_pod_identity_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the Pod Identity IAM role"
+  value       = var.karpenter ? module.karpenter[0].pod_identity_role_arn : null
 }
 
-output "karpenter_irsa_name" {
-  description = "The name of the Karpenter IRSA role"
-  value       = var.karpenter ? module.karpenter[0].irsa_name : null
+output "karpenter_pod_identity_role_name" {
+  description = "The name of the Pod Identity IAM role"
+  value       = var.karpenter ? module.karpenter[0].pod_identity_role_name : null
 }
 
 output "karpenter_role_arn" {

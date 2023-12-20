@@ -1,12 +1,13 @@
 module "karpenter" {
-  count   = var.karpenter ? 1 : 0
-  source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "19.21.0"
-
-  cluster_name                               = var.cluster_name
-  enable_karpenter_instance_profile_creation = true
-  irsa_oidc_provider_arn                     = module.eks.oidc_provider_arn
-  tags                                       = var.tags
+  count  = var.karpenter ? 1 : 0
+  # XXX: Switch source back to module once upgrade is released, refs
+  #      terraform-aws-modules/terraform-aws-eks#2858
+  source = "github.com/radiant-maxar/terraform-aws-eks//karpenter?ref=karpenter-update"
+  # source  = "terraform-aws-modules/eks/aws//modules/karpenter"
+  # version = "20.x.x"
+  cluster_name           = var.cluster_name
+  irsa_oidc_provider_arn = module.eks.oidc_provider_arn
+  tags                   = var.tags
 }
 
 resource "helm_release" "karpenter_crd" {
@@ -37,7 +38,7 @@ resource "helm_release" "karpenter" {
     yamlencode({
       serviceAccount = {
         annotations = {
-          "eks.amazonaws.com/role-arn" = module.karpenter[0].irsa_arn
+          "eks.amazonaws.com/role-arn" = module.karpenter[0].pod_identity_role_arn
         }
       }
       settings = {
