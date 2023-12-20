@@ -41,7 +41,7 @@ resource "helm_release" "aws_lb_controller" {
       }
       "vpcId" = var.vpc_id
     }),
-    yamlencode(var.lb_values),
+    yamlencode(var.lb_controller_values),
   ]
 
   depends_on = [

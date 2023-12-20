@@ -250,14 +250,14 @@ variable "lb_controller" {
   default     = true
 }
 
-variable "lb_values" {
+variable "lb_controller_values" {
   description = "Additional custom values for the AWS Load Balancer Controller Helm chart."
   type        = map(any)
   default     = {}
 }
 
 variable "lb_controller_version" {
-  default     = "1.6.1"
+  default     = "1.6.2"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
