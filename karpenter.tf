@@ -46,9 +46,6 @@ resource "helm_release" "karpenter" {
         clusterName       = var.cluster_name
         interruptionQueue = module.karpenter[0].queue_name
       }
-      webhook = {
-        enabled = true
-      }
     }),
     yamlencode(var.karpenter_values),
   ]
