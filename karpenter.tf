@@ -1,8 +1,8 @@
 module "karpenter" {
   count = var.karpenter ? 1 : 0
-  # XXX: Switch source back to module once upgrade is released, refs
+  # XXX: Switch source back to module once v20 is released, refs
   #      terraform-aws-modules/terraform-aws-eks#2858
-  source = "github.com/radiant-maxar/terraform-aws-eks//karpenter?ref=karpenter-update"
+  source = "github.com/radiant-maxar/terraform-aws-eks//modules/karpenter?ref=v20-prerelease"
   # source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   # version = "20.x.x"
   cluster_name           = var.cluster_name
