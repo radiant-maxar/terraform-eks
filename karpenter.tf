@@ -1,5 +1,5 @@
 module "karpenter" {
-  count  = var.karpenter ? 1 : 0
+  count = var.karpenter ? 1 : 0
   # XXX: Switch source back to module once upgrade is released, refs
   #      terraform-aws-modules/terraform-aws-eks#2858
   source = "github.com/radiant-maxar/terraform-aws-eks//karpenter?ref=karpenter-update"
