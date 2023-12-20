@@ -18,10 +18,6 @@ resource "helm_release" "karpenter_crd" {
   chart            = "karpenter-crd"
   version          = "v${var.karpenter_version}"
 
-  lifecycle {
-    ignore_changes = [repository_password]
-  }
-
   depends_on = [
     module.eks,
     module.karpenter[0],
@@ -58,10 +54,6 @@ resource "helm_release" "karpenter" {
     }),
     yamlencode(var.karpenter_values),
   ]
-
-  lifecycle {
-    ignore_changes = [repository_password]
-  }
 
   depends_on = [
     helm_release.karpenter_crd[0]
