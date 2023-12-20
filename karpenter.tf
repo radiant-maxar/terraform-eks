@@ -54,17 +54,20 @@ resource "helm_release" "karpenter" {
 
   values = [
     yamlencode({
-      "serviceAccount" = {
-        "annotations" = {
+      serviceAccount = {
+        annotations = {
           "eks.amazonaws.com/role-arn" = module.karpenter[0].irsa_arn
         }
       }
-      "settings" = {
-        "aws" = {
-          "clusterEndpoint"        = module.eks.cluster_endpoint
-          "clusterName"            = var.cluster_name
-          "defaultInstanceProfile" = module.karpenter[0].instance_profile_name
-          "interruptionQueueName"  = module.karpenter[0].queue_name
+      settings = {
+        aws = {
+          clusterEndpoint        = module.eks.cluster_endpoint
+          clusterName            = var.cluster_name
+          defaultInstanceProfile = module.karpenter[0].instance_profile_name
+          interruptionQueueName  = module.karpenter[0].queue_name
+        }
+        webhook = {
+          enabled = true
         }
       }
     }),
