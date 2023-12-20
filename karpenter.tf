@@ -41,15 +41,12 @@ resource "helm_release" "karpenter" {
         }
       }
       settings = {
-        aws = {
-          clusterEndpoint        = module.eks.cluster_endpoint
-          clusterName            = var.cluster_name
-          defaultInstanceProfile = module.karpenter[0].instance_profile_name
-          interruptionQueueName  = module.karpenter[0].queue_name
-        }
-        webhook = {
-          enabled = true
-        }
+        clusterEndpoint   = module.eks.cluster_endpoint
+        clusterName       = var.cluster_name
+        interruptionQueue = module.karpenter[0].queue_name
+      }
+      webhook = {
+        enabled = true
       }
     }),
     yamlencode(var.karpenter_values),
