@@ -26,6 +26,7 @@ resource "helm_release" "aws_ebs_csi_driver" {
   chart      = "aws-ebs-csi-driver"
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   version    = var.ebs_csi_driver_version
+  wait       = var.ebs_csi_driver_wait
 
   values = [
     yamlencode({

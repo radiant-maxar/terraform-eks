@@ -26,6 +26,7 @@ resource "helm_release" "aws_lb_controller" {
   chart      = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   version    = var.lb_controller_version
+  wait       = var.lb_controller_wait
 
   values = [
     yamlencode({

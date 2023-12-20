@@ -7,6 +7,7 @@ resource "helm_release" "nvidia_gpu_operator" {
   name             = "gpu-operator"
   namespace        = "nvidia/gpu-operator"
   repository       = "https://helm.ngc.nvidia.com/nvidia"
+  wait             = var.nvidia_gpu_operator_wait
   version          = "v${var.nvidia_gpu_operator_version}"
 
   depends_on = [

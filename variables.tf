@@ -4,6 +4,12 @@ variable "aws_auth_roles" {
   default     = []
 }
 
+variable "cert_manager_wait" {
+  description = "Wait for the cert-manager Helm chart installation to complete."
+  type        = bool
+  default     = true
+}
+
 variable "cert_manager_values" {
   description = "Additional custom values for the cert-manager Helm chart."
   type        = map(any)
@@ -142,6 +148,12 @@ variable "ebs_csi_driver" {
   default     = true
 }
 
+variable "ebs_csi_driver_wait" {
+  description = "Wait for the EBS CSI storage driver Helm chart install to complete."
+  type        = bool
+  default     = true
+}
+
 variable "ebs_csi_driver_values" {
   description = "Additional custom values for the EBS CSI Driver Helm chart."
   type        = map(any)
@@ -156,6 +168,12 @@ variable "ebs_csi_driver_version" {
 
 variable "efs_csi_driver" {
   description = "Install and configure the EFS CSI storage driver."
+  type        = bool
+  default     = true
+}
+
+variable "efs_csi_driver_wait" {
+  description = "Wait for the EFS CSI storage driver Helm chart install to complete."
   type        = bool
   default     = true
 }
@@ -208,6 +226,12 @@ variable "karpenter" {
   default     = false
 }
 
+variable "karpenter_wait" {
+  description = "Wait for the Karpenter Helm chart installation to complete."
+  type        = bool
+  default     = true
+}
+
 variable "karpenter_values" {
   description = "Additional custom values to use when installing the Karpenter Helm chart."
   type        = map(any)
@@ -245,7 +269,13 @@ variable "kubernetes_version" {
 }
 
 variable "lb_controller" {
-  description = "Install and configure the AWS Load Balancer controller."
+  description = "Install and configure the AWS Load Balancer Controller."
+  type        = bool
+  default     = true
+}
+
+variable "lb_controller_wait" {
+  description = "Wait for the AWS Load Balancer Controller Helm chart install to complete."
   type        = bool
   default     = true
 }
@@ -295,6 +325,12 @@ variable "nvidia_gpu_operator" {
   default     = false
   description = "Whether to install the NVIDIA GPU Operator."
   type        = bool
+}
+
+variable "nvidia_gpu_operator_wait" {
+  description = "Wait for the NVIDIA GPU Operator Helm chart installation to complete."
+  type        = bool
+  default     = true
 }
 
 variable "nvidia_gpu_operator_version" {

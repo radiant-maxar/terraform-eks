@@ -64,6 +64,7 @@ resource "helm_release" "cert_manager" {
   chart            = "cert-manager"
   repository       = "https://charts.jetstack.io"
   version          = "v${var.cert_manager_version}"
+  wait             = var.cert_manager_wait
   keyring          = "${path.module}/cert-manager-keyring.gpg"
   verify           = var.helm_verify
 

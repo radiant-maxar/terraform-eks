@@ -35,6 +35,7 @@ resource "helm_release" "karpenter" {
   repository = "oci://public.ecr.aws/karpenter"
   chart      = "karpenter"
   version    = "v${var.karpenter_version}"
+  wait       = var.karpenter_wait
 
   values = [
     yamlencode({
