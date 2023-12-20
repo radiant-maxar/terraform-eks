@@ -5,16 +5,17 @@ module "karpenter" {
   source = "github.com/radiant-maxar/terraform-aws-eks//modules/karpenter?ref=v20-prerelease"
   # source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   # version = "20.x.x"
-  cluster_name           = var.cluster_name
-  irsa_oidc_provider_arn = module.eks.oidc_provider_arn
-  tags                   = var.tags
+  cluster_name                    = var.cluster_name
+  irsa_namespace_service_accounts = ["${var.karpenter_namespace}:karpenter"]
+  irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
+  tags                            = var.tags
 }
 
 resource "helm_release" "karpenter_crd" {
   count            = var.karpenter ? 1 : 0
   create_namespace = true
   name             = "karpenter-crd"
-  namespace        = "karpenter"
+  namespace        = var.karpenter_namespace
   repository       = "oci://public.ecr.aws/karpenter"
   chart            = "karpenter-crd"
   version          = "v${var.karpenter_version}"
@@ -28,7 +29,7 @@ resource "helm_release" "karpenter_crd" {
 resource "helm_release" "karpenter" {
   count      = var.karpenter ? 1 : 0
   name       = "karpenter"
-  namespace  = "karpenter"
+  namespace  = var.karpenter_namespace
   repository = "oci://public.ecr.aws/karpenter"
   chart      = "karpenter"
   version    = "v${var.karpenter_version}"

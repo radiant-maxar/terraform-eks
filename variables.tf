@@ -226,16 +226,22 @@ variable "karpenter" {
   default     = false
 }
 
-variable "karpenter_wait" {
-  description = "Wait for the Karpenter Helm chart installation to complete."
-  type        = bool
-  default     = true
+variable "karpenter_namespace" {
+  default     = "karpenter"
+  description = "Namespace that Karpenter will use."
+  type        = string
 }
 
 variable "karpenter_values" {
   description = "Additional custom values to use when installing the Karpenter Helm chart."
   type        = map(any)
   default     = {}
+}
+
+variable "karpenter_wait" {
+  description = "Wait for the Karpenter Helm chart installation to complete."
+  type        = bool
+  default     = true
 }
 
 variable "karpenter_version" {
