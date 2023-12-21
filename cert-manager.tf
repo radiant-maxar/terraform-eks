@@ -14,7 +14,7 @@ module "cert_manager_irsa" {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "cert-manager:cert-manager",
+        "${var.cert_manager_namespace}:cert-manager",
       ]
     }
   }
@@ -59,7 +59,7 @@ resource "aws_iam_role_policy_attachment" "cert_manager" {
 resource "helm_release" "cert_manager" {
   count            = local.cert_manager ? 1 : 0
   name             = "cert-manager"
-  namespace        = "cert-manager"
+  namespace        = var.cert_manager_namespace
   create_namespace = true
   chart            = "cert-manager"
   repository       = "https://charts.jetstack.io"

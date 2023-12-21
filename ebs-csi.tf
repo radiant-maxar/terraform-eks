@@ -12,7 +12,7 @@ module "eks_ebs_csi_irsa" {
   oidc_providers = {
     main = {
       provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+      namespace_service_accounts = ["${var.ebs_csi_driver_namespace}:ebs-csi-controller-sa"]
     }
   }
 
@@ -22,7 +22,7 @@ module "eks_ebs_csi_irsa" {
 resource "helm_release" "aws_ebs_csi_driver" {
   count      = var.ebs_csi_driver ? 1 : 0
   name       = "aws-ebs-csi-driver"
-  namespace  = "kube-system"
+  namespace  = var.ebs_csi_driver_namespace
   chart      = "aws-ebs-csi-driver"
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   version    = var.ebs_csi_driver_version

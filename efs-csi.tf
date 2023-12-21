@@ -29,7 +29,7 @@ module "eks_efs_csi_controller_irsa" {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "kube-system:efs-csi-controller-sa",
+        "${var.efs_csi_driver_namespace}:efs-csi-controller-sa",
       ]
     }
   }
@@ -46,7 +46,7 @@ module "eks_efs_csi_node_irsa" {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "kube-system:efs-csi-node-sa",
+        "${var.efs_csi_driver_namespace}:efs-csi-node-sa",
       ]
     }
   }
@@ -99,7 +99,7 @@ resource "aws_efs_mount_target" "eks_efs_private" {
 resource "helm_release" "aws_efs_csi_driver" {
   count      = var.efs_csi_driver ? 1 : 0
   name       = "aws-efs-csi-driver"
-  namespace  = "kube-system"
+  namespace  = var.efs_csi_driver_namespace
   chart      = "aws-efs-csi-driver"
   repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver"
   version    = var.efs_csi_driver_version

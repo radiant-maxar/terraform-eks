@@ -4,16 +4,22 @@ variable "aws_auth_roles" {
   default     = []
 }
 
-variable "cert_manager_wait" {
-  description = "Wait for the cert-manager Helm chart installation to complete."
-  type        = bool
-  default     = true
+variable "cert_manager_namespace" {
+  default     = "cert-manager"
+  description = "Namespace that cert-manager will use."
+  type        = string
 }
 
 variable "cert_manager_values" {
   description = "Additional custom values for the cert-manager Helm chart."
   type        = map(any)
   default     = {}
+}
+
+variable "cert_manager_wait" {
+  description = "Wait for the cert-manager Helm chart installation to complete."
+  type        = bool
+  default     = true
 }
 
 variable "cert_manager_version" {
@@ -148,16 +154,22 @@ variable "ebs_csi_driver" {
   default     = true
 }
 
-variable "ebs_csi_driver_wait" {
-  description = "Wait for the EBS CSI storage driver Helm chart install to complete."
-  type        = bool
-  default     = true
+variable "ebs_csi_driver_namespace" {
+  default     = "kube-system"
+  description = "Namespace that EBS CSI storage driver will use."
+  type        = string
 }
 
 variable "ebs_csi_driver_values" {
   description = "Additional custom values for the EBS CSI Driver Helm chart."
   type        = map(any)
   default     = {}
+}
+
+variable "ebs_csi_driver_wait" {
+  description = "Wait for the EBS CSI storage driver Helm chart install to complete."
+  type        = bool
+  default     = true
 }
 
 variable "ebs_csi_driver_version" {
@@ -172,10 +184,10 @@ variable "efs_csi_driver" {
   default     = true
 }
 
-variable "efs_csi_driver_wait" {
-  description = "Wait for the EFS CSI storage driver Helm chart install to complete."
-  type        = bool
-  default     = true
+variable "efs_csi_driver_namespace" {
+  default     = "kube-system"
+  description = "Namespace that EFS CSI storage driver will use."
+  type        = string
 }
 
 variable "efs_csi_driver_values" {
@@ -188,6 +200,12 @@ variable "efs_csi_driver_version" {
   default     = "2.5.2"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
+}
+
+variable "efs_csi_driver_wait" {
+  description = "Wait for the EFS CSI storage driver Helm chart install to complete."
+  type        = bool
+  default     = true
 }
 
 variable "eks_managed_node_groups" {
@@ -280,10 +298,10 @@ variable "lb_controller" {
   default     = true
 }
 
-variable "lb_controller_wait" {
-  description = "Wait for the AWS Load Balancer Controller Helm chart install to complete."
-  type        = bool
-  default     = true
+variable "lb_controller_namespace" {
+  default     = "kube-system"
+  description = "Namespace that AWS Load Balancer Controller will use."
+  type        = string
 }
 
 variable "lb_controller_values" {
@@ -296,6 +314,12 @@ variable "lb_controller_version" {
   default     = "1.6.2"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
+}
+
+variable "lb_controller_wait" {
+  description = "Wait for the AWS Load Balancer Controller Helm chart install to complete."
+  type        = bool
+  default     = true
 }
 
 variable "node_security_group_additional_rules" {
@@ -333,16 +357,22 @@ variable "nvidia_gpu_operator" {
   type        = bool
 }
 
-variable "nvidia_gpu_operator_wait" {
-  description = "Wait for the NVIDIA GPU Operator Helm chart installation to complete."
-  type        = bool
-  default     = true
+variable "nvidia_gpu_operator_namespace" {
+  default     = "nvidia/gpu-operator"
+  description = "Namespace that NVIDIA GPU Operator will use."
+  type        = string
 }
 
 variable "nvidia_gpu_operator_version" {
   default     = "23.9.1"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
+}
+
+variable "nvidia_gpu_operator_wait" {
+  description = "Wait for the NVIDIA GPU Operator Helm chart installation to complete."
+  type        = bool
+  default     = true
 }
 
 variable "private_subnets" {

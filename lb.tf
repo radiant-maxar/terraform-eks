@@ -12,7 +12,7 @@ module "eks_lb_irsa" {
   oidc_providers = {
     main = {
       provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+      namespace_service_accounts = ["${var.lb_controller_namespace}:aws-load-balancer-controller"]
     }
   }
 
@@ -22,7 +22,7 @@ module "eks_lb_irsa" {
 resource "helm_release" "aws_lb_controller" {
   count      = var.lb_controller ? 1 : 0
   name       = "aws-load-balancer-controller"
-  namespace  = "kube-system"
+  namespace  = var.lb_controller_namespace
   chart      = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   version    = var.lb_controller_version
