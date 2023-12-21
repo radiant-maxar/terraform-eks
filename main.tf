@@ -8,7 +8,7 @@ locals {
   aws_region     = data.aws_region.current.name
   aws_auth_karpenter_roles = var.karpenter ? [
     {
-      rolearn  = module.karpenter[0].pod_identity_role_arn
+      rolearn  = module.karpenter[0].role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
       groups = [
         "system:bootstrappers",

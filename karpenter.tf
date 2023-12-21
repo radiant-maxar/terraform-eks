@@ -2,7 +2,7 @@ module "karpenter" {
   count = var.karpenter ? 1 : 0
   # XXX: Switch source back to module once v20 is released, refs
   #      terraform-aws-modules/terraform-aws-eks#2858
-  source = "github.com/radiant-maxar/terraform-aws-eks//modules/karpenter?ref=v20-prerelease"
+  source = "github.com/radiant-maxar/terraform-aws-eks//modules/karpenter?ref=v20.0.0-alpha"
   # source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   # version = "20.x.x"
   cluster_name                    = var.cluster_name
@@ -37,11 +37,6 @@ resource "helm_release" "karpenter" {
 
   values = [
     yamlencode({
-      serviceAccount = {
-        annotations = {
-          "eks.amazonaws.com/role-arn" = module.karpenter[0].pod_identity_role_arn
-        }
-      }
       settings = {
         clusterEndpoint   = module.eks.cluster_endpoint
         clusterName       = var.cluster_name
