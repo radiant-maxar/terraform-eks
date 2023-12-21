@@ -1,12 +1,24 @@
 ## EFS CSI Storage Driver
 
 locals {
-  efs_arns = [
-    "arn:${local.aws_partition}:elasticfilesystem:${local.aws_region}:${local.aws_account_id}:file-system/*"
-  ]
   efs_access_point_arns = [
     "arn:${local.aws_partition}:elasticfilesystem:${local.aws_region}:${local.aws_account_id}:access-point/*"
   ]
+}
+
+resource "aws_efs_file_system" "eks_efs" {
+  count          = var.efs_csi_driver ? 1 : 0
+  creation_token = "${var.cluster_name}-efs"
+  encrypted      = true
+  kms_key_id     = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
+  tags           = var.tags
+}
+
+resource "aws_efs_mount_target" "eks_efs_private" {
+  count           = var.efs_csi_driver ? length(var.private_subnets) : 0
+  file_system_id  = aws_efs_file_system.eks_efs[0].id
+  subnet_id       = var.private_subnets[count.index]
+  security_groups = [module.eks.cluster_primary_security_group_id]
 }
 
 # Allow PVCs backed by EFS
@@ -63,7 +75,7 @@ data "aws_iam_policy_document" "eks_efs_csi_driver" {
       "elasticfilesystem:DescribeMountTargets"
     ]
     resources = flatten([
-      local.efs_arns,
+      aws_efs_file_system.eks_efs[*].arn,
       local.efs_access_point_arns,
     ])
   }
@@ -73,7 +85,7 @@ data "aws_iam_policy_document" "eks_efs_csi_driver" {
       "elasticfilesystem:CreateAccessPoint",
       "elasticfilesystem:TagResource",
     ]
-    resources = local.efs_arns
+    resources = aws_efs_file_system.eks_efs[*].arn
 
     condition {
       test     = "StringLike"
@@ -101,7 +113,7 @@ data "aws_iam_policy_document" "eks_efs_csi_driver" {
       "elasticfilesystem:ClientWrite",
       "elasticfilesystem:ClientMount",
     ]
-    resources = local.efs_arns
+    resources = aws_efs_file_system.eks_efs[*].arn
 
     condition {
       test     = "Bool"
@@ -135,21 +147,6 @@ resource "aws_iam_role_policy_attachment" "eks_efs_csi_node" {
   depends_on = [
     module.eks_efs_csi_node_irsa[0]
   ]
-}
-
-resource "aws_efs_file_system" "eks_efs" {
-  count          = var.efs_csi_driver ? 1 : 0
-  creation_token = "${var.cluster_name}-efs"
-  encrypted      = true
-  kms_key_id     = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
-  tags           = var.tags
-}
-
-resource "aws_efs_mount_target" "eks_efs_private" {
-  count           = var.efs_csi_driver ? length(var.private_subnets) : 0
-  file_system_id  = aws_efs_file_system.eks_efs[0].id
-  subnet_id       = var.private_subnets[count.index]
-  security_groups = [module.eks.cluster_primary_security_group_id]
 }
 
 resource "helm_release" "aws_efs_csi_driver" {
