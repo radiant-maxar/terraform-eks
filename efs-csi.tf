@@ -46,7 +46,7 @@ module "eks_efs_csi_node_irsa" {
   tags = var.tags
 }
 
-data "aws_iam_policy_document" "aws_efs_csi_driver" {
+data "aws_iam_policy_document" "eks_efs_csi_driver" {
   count = var.efs_csi_driver ? 1 : 0
 
   statement {
