@@ -1,11 +1,12 @@
 module "karpenter" {
-  # XXX: Switch source back to module once v20 is released, refs
+  # XXX: Switch source back to module once there is an official v20 release, refs
   #      terraform-aws-modules/terraform-aws-eks#2858
   count  = var.karpenter ? 1 : 0
   source = "github.com/radiant-maxar/terraform-aws-eks//modules/karpenter?ref=v20.0.0-alpha"
   # source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   # version = "20.x.x"
   cluster_name                    = var.cluster_name
+  iam_role_attach_cni_policy      = var.iam_role_attach_cni_policy
   irsa_namespace_service_accounts = ["${var.karpenter_namespace}:karpenter"]
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn
   tags                            = var.tags
