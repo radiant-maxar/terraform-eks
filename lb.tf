@@ -20,13 +20,14 @@ module "eks_lb_irsa" {
 }
 
 resource "helm_release" "aws_lb_controller" {
-  count      = var.lb_controller ? 1 : 0
-  name       = "aws-load-balancer-controller"
-  namespace  = var.lb_controller_namespace
-  chart      = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  version    = var.lb_controller_version
-  wait       = var.lb_controller_wait
+  count            = var.lb_controller ? 1 : 0
+  chart            = "aws-load-balancer-controller"
+  create_namespace = var.lb_controller_namespace == "kube-system" ? false : true
+  name             = "aws-load-balancer-controller"
+  namespace        = var.lb_controller_namespace
+  repository       = "https://aws.github.io/eks-charts"
+  version          = var.lb_controller_version
+  wait             = var.lb_controller_wait
 
   values = [
     yamlencode({

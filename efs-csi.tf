@@ -97,13 +97,15 @@ resource "aws_efs_mount_target" "eks_efs_private" {
 }
 
 resource "helm_release" "aws_efs_csi_driver" {
-  count      = var.efs_csi_driver ? 1 : 0
-  name       = "aws-efs-csi-driver"
-  namespace  = var.efs_csi_driver_namespace
-  chart      = "aws-efs-csi-driver"
-  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver"
-  version    = var.efs_csi_driver_version
-  wait       = var.efs_csi_driver_wait
+  count            = var.efs_csi_driver ? 1 : 0
+  chart            = "aws-efs-csi-driver"
+  create_namespace = var.efs_csi_driver_namespace == "kube-system" ? false : true
+  name             = "aws-efs-csi-driver"
+  namespace        = var.efs_csi_driver_namespace
+  repository       = "https://kubernetes-sigs.github.io/aws-efs-csi-driver"
+  version          = var.efs_csi_driver_version
+  wait             = var.efs_csi_driver_wait
+
 
   values = [
     yamlencode({

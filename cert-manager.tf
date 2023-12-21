@@ -60,7 +60,7 @@ resource "helm_release" "cert_manager" {
   count            = local.cert_manager ? 1 : 0
   name             = "cert-manager"
   namespace        = var.cert_manager_namespace
-  create_namespace = true
+  create_namespace = var.cert_manager_namespace == "kube-system" ? false : true
   chart            = "cert-manager"
   repository       = "https://charts.jetstack.io"
   version          = "v${var.cert_manager_version}"

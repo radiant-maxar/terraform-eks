@@ -20,13 +20,14 @@ module "eks_ebs_csi_irsa" {
 }
 
 resource "helm_release" "aws_ebs_csi_driver" {
-  count      = var.ebs_csi_driver ? 1 : 0
-  name       = "aws-ebs-csi-driver"
-  namespace  = var.ebs_csi_driver_namespace
-  chart      = "aws-ebs-csi-driver"
-  repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
-  version    = var.ebs_csi_driver_version
-  wait       = var.ebs_csi_driver_wait
+  count            = var.ebs_csi_driver ? 1 : 0
+  chart            = "aws-ebs-csi-driver"
+  create_namespace = var.ebs_csi_driver_namespace == "kube-system" ? false : true
+  name             = "aws-ebs-csi-driver"
+  namespace        = var.ebs_csi_driver_namespace
+  repository       = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+  version          = var.ebs_csi_driver_version
+  wait             = var.ebs_csi_driver_wait
 
   values = [
     yamlencode({

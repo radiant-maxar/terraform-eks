@@ -13,7 +13,7 @@ module "karpenter" {
 
 resource "helm_release" "karpenter_crd" {
   count            = var.karpenter ? 1 : 0
-  create_namespace = true
+  create_namespace = var.karpenter_namespace == "kube-system" ? false : true
   name             = "karpenter-crd"
   namespace        = var.karpenter_namespace
   repository       = "oci://public.ecr.aws/karpenter"

@@ -3,7 +3,7 @@
 resource "helm_release" "nvidia_gpu_operator" {
   count            = var.nvidia_gpu_operator ? 1 : 0
   chart            = "gpu-operator"
-  create_namespace = true
+  create_namespace = var.nvidia_gpu_operator_namespace == "kube-system" ? false : true
   name             = "gpu-operator"
   namespace        = var.nvidia_gpu_operator_namespace
   repository       = "https://helm.ngc.nvidia.com/nvidia"
