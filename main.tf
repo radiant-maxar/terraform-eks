@@ -91,7 +91,6 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
     iam_role_attach_cni_policy = var.iam_role_attach_cni_policy
     max_size                   = var.default_max_size
     min_size                   = var.default_min_size
-    vpc_security_group_ids     = aws_security_group.eks_efs_sg[*].id
   }
   eks_managed_node_groups = var.eks_managed_node_groups
 

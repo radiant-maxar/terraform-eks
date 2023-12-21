@@ -13,6 +13,11 @@ output "cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
+output "cluster_primary_security_group_id" {
+  description = "Cluster security group that was created by Amazon EKS for the cluster. Managed node groups use this security group for control-plane-to-data-plane communication. Referred to as 'Cluster security group' in the EKS console"
+  value       = module.eks.cluster_primary_security_group_id
+}
+
 output "eks_managed_node_groups" {
   description = "Map of attribute maps for all EKS managed node groups created"
   value       = module.eks.eks_managed_node_groups

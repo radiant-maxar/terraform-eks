@@ -1,19 +1,12 @@
 ## EFS CSI Storage Driver
-resource "aws_security_group" "eks_efs_sg" {
-  count       = var.efs_csi_driver ? 1 : 0
-  name        = "${var.cluster_name}-efs-sg"
-  description = "Security group for EFS clients in EKS VPC"
-  vpc_id      = var.vpc_id
 
-  ingress {
-    description = "Ingress NFS traffic for EFS"
-    from_port   = 2049
-    to_port     = 2049
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
-  tags = var.tags
+locals {
+  efs_arns = [
+    "arn:${local.aws_partition}:elasticfilesystem:${local.aws_region}:${local.aws_account_id}:file-system/*"
+  ]
+  efs_access_point_arns = [
+    "arn:${local.aws_partition}:elasticfilesystem:${local.aws_region}:${local.aws_account_id}:access-point/*"
+  ]
 }
 
 # Allow PVCs backed by EFS
@@ -22,8 +15,7 @@ module "eks_efs_csi_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 
-  role_name             = "${var.cluster_name}-efs-csi-controller-role"
-  attach_efs_csi_policy = true
+  role_name = "${var.cluster_name}-efs-csi-controller-role"
 
   oidc_providers = {
     main = {
@@ -42,6 +34,7 @@ module "eks_efs_csi_node_irsa" {
   version = "5.33.0"
 
   role_name = "${var.cluster_name}-efs-csi-node-role"
+
   oidc_providers = {
     main = {
       provider_arn = module.eks.oidc_provider_arn
@@ -53,29 +46,92 @@ module "eks_efs_csi_node_irsa" {
   tags = var.tags
 }
 
-data "aws_iam_policy_document" "eks_efs_csi_node" {
+data "aws_iam_policy_document" "aws_efs_csi_driver" {
   count = var.efs_csi_driver ? 1 : 0
+
+  statement {
+    sid       = "AllowDescribeAvailabilityZones"
+    actions   = ["ec2:DescribeAvailabilityZones"]
+    resources = ["*"] # tfsec:ignore:aws-iam-no-policy-wildcards
+  }
+
+  statement {
+    sid = "AllowDescribeFileSystems"
+    actions = [
+      "elasticfilesystem:DescribeAccessPoints",
+      "elasticfilesystem:DescribeFileSystems",
+      "elasticfilesystem:DescribeMountTargets"
+    ]
+    resources = flatten([
+      local.efs_arns,
+      local.efs_access_point_arns,
+    ])
+  }
+
   statement {
     actions = [
-      "elasticfilesystem:DescribeMountTargets",
-      "ec2:DescribeAvailabilityZones",
+      "elasticfilesystem:CreateAccessPoint",
+      "elasticfilesystem:TagResource",
     ]
-    resources = ["*"] # tfsec:ignore:aws-iam-no-policy-wildcards
+    resources = local.efs_arns
+
+    condition {
+      test     = "StringLike"
+      variable = "aws:RequestTag/efs.csi.aws.com/cluster"
+      values   = ["true"]
+    }
+  }
+
+  statement {
+    sid       = "AllowDeleteAccessPoint"
+    actions   = ["elasticfilesystem:DeleteAccessPoint"]
+    resources = local.efs_access_point_arns
+
+    condition {
+      test     = "StringLike"
+      variable = "aws:ResourceTag/efs.csi.aws.com/cluster"
+      values   = ["true"]
+    }
+  }
+
+  statement {
+    sid = "ClientReadWrite"
+    actions = [
+      "elasticfilesystem:ClientRootAccess",
+      "elasticfilesystem:ClientWrite",
+      "elasticfilesystem:ClientMount",
+    ]
+    resources = local.efs_arns
+
+    condition {
+      test     = "Bool"
+      variable = "elasticfilesystem:AccessedViaMountTarget"
+      values   = ["true"]
+    }
   }
 }
 
-resource "aws_iam_policy" "eks_efs_csi_node" {
+resource "aws_iam_policy" "eks_efs_csi_driver" {
   count       = var.efs_csi_driver ? 1 : 0
-  name        = "AmazonEKS_EFS_CSI_Node_Policy-${var.cluster_name}"
-  description = "Provides node permissions to use the EFS CSI driver"
-  policy      = data.aws_iam_policy_document.eks_efs_csi_node[0].json
+  name        = "AmazonEKS_EFS_CSI_Policy-${var.cluster_name}"
+  description = "Provides permissions to manage EFS volumes via the container storage interface driver"
+  policy      = data.aws_iam_policy_document.eks_efs_csi_driver[0].json
   tags        = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "eks_efs_csi_controller" {
+  count      = var.efs_csi_driver ? 1 : 0
+  role       = "${var.cluster_name}-efs-csi-controller-role"
+  policy_arn = aws_iam_policy.eks_efs_csi_driver[0].arn
+  depends_on = [
+    module.eks_efs_csi_controller_irsa[0]
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "eks_efs_csi_node" {
   count      = var.efs_csi_driver ? 1 : 0
   role       = "${var.cluster_name}-efs-csi-node-role"
-  policy_arn = aws_iam_policy.eks_efs_csi_node[0].arn
+  policy_arn = aws_iam_policy.eks_efs_csi_driver[0].arn
   depends_on = [
     module.eks_efs_csi_node_irsa[0]
   ]
@@ -93,7 +149,7 @@ resource "aws_efs_mount_target" "eks_efs_private" {
   count           = var.efs_csi_driver ? length(var.private_subnets) : 0
   file_system_id  = aws_efs_file_system.eks_efs[0].id
   subnet_id       = var.private_subnets[count.index]
-  security_groups = aws_security_group.eks_efs_sg[*].id
+  security_groups = [module.eks.cluster_primary_security_group_id]
 }
 
 resource "helm_release" "aws_efs_csi_driver" {
