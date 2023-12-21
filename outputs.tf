@@ -13,14 +13,39 @@ output "cluster_oidc_issuer_url" {
   value       = module.eks.cluster_oidc_issuer_url
 }
 
+output "cluster_primary_security_group_id" {
+  description = "Cluster security group that was created by Amazon EKS for the cluster. Managed node groups use this security group for control-plane-to-data-plane communication. Referred to as 'Cluster security group' in the EKS console"
+  value       = module.eks.cluster_primary_security_group_id
+}
+
 output "eks_managed_node_groups" {
   description = "Map of attribute maps for all EKS managed node groups created"
   value       = module.eks.eks_managed_node_groups
 }
 
+output "karpenter_pod_identity_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the Pod Identity IAM role"
+  value       = var.karpenter ? module.karpenter[0].pod_identity_role_arn : null
+}
+
+output "karpenter_pod_identity_role_name" {
+  description = "The name of the Pod Identity IAM role"
+  value       = var.karpenter ? module.karpenter[0].pod_identity_role_name : null
+}
+
+output "karpenter_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the Karpenter IAM role"
+  value       = var.karpenter ? module.karpenter[0].role_arn : null
+}
+
+output "karpenter_role_name" {
+  description = "The name of the Karpenter IAM role"
+  value       = var.karpenter ? module.karpenter[0].role_name : null
+}
+
 output "kms_key_arn" {
   description = "The Amazon Resource Name (ARN) of the KMS key for the EKS cluster."
-  value       = aws_kms_key.this.arn
+  value       = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
 }
 
 output "node_security_group_arn" {
