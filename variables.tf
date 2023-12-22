@@ -115,6 +115,12 @@ variable "create_node_security_group" {
   default     = true
 }
 
+variable "crossplane" {
+  description = "Indicates whether to install Crossplane."
+  type        = bool
+  default     = false
+}
+
 variable "crossplane_namespace" {
   default     = "crossplane-system"
   description = "Namespace that Crossplane will use."

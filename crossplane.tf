@@ -1,10 +1,6 @@
 ## Crossplane
-locals {
-  crossplane = length(var.crossplane_policy_arns) > 0
-}
-
 module "crossplane_irsa" {
-  count   = local.crossplane ? 1 : 0
+  count   = var.crossplane ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 
@@ -22,7 +18,7 @@ module "crossplane_irsa" {
 }
 
 resource "aws_iam_role_policy_attachment" "crossplane" {
-  count      = local.crossplane ? length(var.crossplane_policy_arns) : 0
+  count      = var.crossplane ? length(var.crossplane_policy_arns) : 0
   role       = "${var.cluster_name}-crossplane-role"
   policy_arn = var.crossplane_policy_arns[count.index]
   depends_on = [
@@ -31,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "crossplane" {
 }
 
 resource "helm_release" "crossplane" {
-  count            = local.crossplane ? 1 : 0
+  count            = var.crossplane ? 1 : 0
   name             = "crossplane"
   namespace        = var.crossplane_namespace
   create_namespace = var.crossplane_namespace == "kube-system" ? false : true
