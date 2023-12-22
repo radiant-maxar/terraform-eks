@@ -24,7 +24,7 @@ module "crossplane_irsa" {
 resource "aws_iam_role_policy_attachment" "crossplane" {
   count      = local.crossplane ? length(var.crossplane_policy_arns) : 0
   role       = "${var.cluster_name}-crossplane-role"
-  policy_arn = aws_iam_policy.crossplane[*].arn
+  policy_arn = var.crossplane_policy_arns[count.index]
   depends_on = [
     module.crossplane_irsa[0]
   ]
