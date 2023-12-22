@@ -1,5 +1,6 @@
 # Authorize VPC CNI via IRSA.
 module "eks_vpc_cni_irsa" {
+  count   = var.vpc_cni ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 

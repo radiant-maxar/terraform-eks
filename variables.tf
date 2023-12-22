@@ -34,12 +34,6 @@ variable "cert_manager_route53_zone_id" {
   type        = string
 }
 
-variable "cluster_addons_coredns" {
-  description = "Indicates whether to install the CoreDNS cluster addon."
-  type        = bool
-  default     = true
-}
-
 variable "cluster_addons_most_recent" {
   description = "Indicates whether to use the most recent version of cluster addons"
   type        = bool
@@ -99,6 +93,18 @@ variable "cluster_security_group_additional_rules" {
 
 variable "create_cluster_security_group" {
   description = "Determines if a security group is created for the cluster. Note: the EKS service creates a primary security group for the cluster by default"
+  type        = bool
+  default     = true
+}
+
+variable "coredns" {
+  description = "Indicates whether to install the CoreDNS cluster addon."
+  type        = bool
+  default     = true
+}
+
+variable "coredns_fargate" {
+  description = "Indicates whether to configure CoreDNS for running in Fargate."
   type        = bool
   default     = true
 }
@@ -214,6 +220,12 @@ variable "eks_managed_node_groups" {
   default     = {}
 }
 
+variable "eks_pod_identity_agent" {
+  description = "Indicates whether to install the eks-pod-identity-agent cluster addon."
+  type        = bool
+  default     = true
+}
+
 variable "fargate_profiles" {
   description = "Map of Fargate Profile definitions to create."
   type        = map(any)
@@ -282,6 +294,12 @@ variable "kms_key_deletion_window_in_days" {
 
 variable "kms_key_enable_default_policy" {
   description = "Specifies whether to enable the default key policy. Defaults to `true` to workaround EFS permissions."
+  type        = bool
+  default     = true
+}
+
+variable "kube_proxy" {
+  description = "Indicates whether to install the kube-proxy cluster addon."
   type        = bool
   default     = true
 }
@@ -405,4 +423,10 @@ variable "vpc_cidr" {
 variable "vpc_id" {
   description = "EKS Cluster VPC ID"
   type        = string
+}
+
+variable "vpc_cni" {
+  description = "Indicates whether to install the vpc-cni cluster addon."
+  type        = bool
+  default     = true
 }
