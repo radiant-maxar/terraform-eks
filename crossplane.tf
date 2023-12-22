@@ -42,8 +42,8 @@ resource "helm_release" "crossplane" {
 
   values = [
     yamlencode({
-      "serviceAccount" = {
-        "annotations" = {
+      serviceAccount = {
+        annotations = {
           "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-crossplane-role"
         }
       }
