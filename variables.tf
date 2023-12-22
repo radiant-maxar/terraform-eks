@@ -179,7 +179,7 @@ variable "ebs_csi_driver_wait" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.25.0"
+  default     = "2.26.0"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -257,7 +257,7 @@ variable "karpenter" {
 }
 
 variable "karpenter_namespace" {
-  default     = "karpenter"
+  default     = "kube-system"
   description = "Namespace that Karpenter will use."
   type        = string
 }
