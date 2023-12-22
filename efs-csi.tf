@@ -202,7 +202,7 @@ resource "kubernetes_storage_class" "eks_efs_storage_class" {
   parameters = merge(
     var.efs_storage_class_parameters,
     { "fileSystemId" = aws_efs_file_system.eks_efs[0].id }
-  }
+  )
   storage_provisioner = "efs.csi.aws.com"
 
   depends_on = [

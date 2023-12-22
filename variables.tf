@@ -265,7 +265,7 @@ variable "efs_storage_class_mount_options" {
 variable "efs_storage_class_parameters" {
   description = "EFS storage class parameters."
   type        = any
-  default     = {
+  default = {
     "provisioningMode" = "efs-ap"
     "directoryPerms"   = "755"
     "uid"              = "0"
