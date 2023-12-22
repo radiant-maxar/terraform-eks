@@ -12,7 +12,7 @@ variable "cert_manager_namespace" {
 
 variable "cert_manager_values" {
   description = "Additional custom values for the cert-manager Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -42,7 +42,7 @@ variable "cluster_addons_most_recent" {
 
 variable "cluster_addons_overrides" {
   description = "Override parameters for cluster addons."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -168,7 +168,7 @@ variable "ebs_csi_driver_namespace" {
 
 variable "ebs_csi_driver_values" {
   description = "Additional custom values for the EBS CSI Driver Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -198,7 +198,7 @@ variable "efs_csi_driver_namespace" {
 
 variable "efs_csi_driver_values" {
   description = "Additional custom values for the EFS CSI Driver Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -234,7 +234,7 @@ variable "fargate_profiles" {
 
 variable "fargate_profile_defaults" {
   description = "Map of Fargate Profile default configurations."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -264,7 +264,7 @@ variable "karpenter_namespace" {
 
 variable "karpenter_values" {
   description = "Additional custom values to use when installing the Karpenter Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -324,7 +324,7 @@ variable "lb_controller_namespace" {
 
 variable "lb_controller_values" {
   description = "Additional custom values for the AWS Load Balancer Controller Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
