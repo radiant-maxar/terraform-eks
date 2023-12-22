@@ -441,7 +441,7 @@ variable "nvidia_gpu_operator" {
 }
 
 variable "nvidia_gpu_operator_namespace" {
-  default     = "nvidia-gpu-operator"
+  default     = "gpu-operator"
   description = "Namespace that NVIDIA GPU Operator will use."
   type        = string
 }
