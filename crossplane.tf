@@ -39,7 +39,6 @@ resource "helm_release" "crossplane" {
   repository       = "https://charts.crossplane.io/stable"
   version          = var.crossplane_version
   wait             = var.crossplane_wait
-  verify           = var.helm_verify
 
   values = [
     yamlencode({
