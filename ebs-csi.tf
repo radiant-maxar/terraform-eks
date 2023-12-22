@@ -64,8 +64,8 @@ resource "kubernetes_storage_class" "eks_ebs_storage_class" {
     name   = "ebs-sc"
   }
 
-  mount_options       = []
-  parameters          = {}
+  mount_options       = var.ebs_storage_class_mount_options
+  parameters          = var.ebs_storage_class_parameters
   storage_provisioner = "ebs.csi.aws.com"
   volume_binding_mode = "WaitForFirstConsumer"
 

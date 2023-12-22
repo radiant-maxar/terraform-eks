@@ -159,7 +159,6 @@ resource "helm_release" "aws_efs_csi_driver" {
   version          = var.efs_csi_driver_version
   wait             = var.efs_csi_driver_wait
 
-
   values = [
     yamlencode({
       "controller" = {
@@ -199,13 +198,10 @@ resource "kubernetes_storage_class" "eks_efs_storage_class" {
     labels      = {}
   }
 
-  mount_options = []
-  parameters = {
-    "provisioningMode" = "efs-ap"
-    "fileSystemId"     = aws_efs_file_system.eks_efs[0].id
-    "directoryPerms"   = "755"
-    "uid"              = "0"
-    "gid"              = "0"
+  mount_options = var.efs_storage_class_mount_options
+  parameters = merge(
+    var.efs_storage_class_parameters,
+    { "fileSystemId" = aws_efs_file_system.eks_efs[0].id }
   }
   storage_provisioner = "efs.csi.aws.com"
 

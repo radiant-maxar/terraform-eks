@@ -214,6 +214,18 @@ variable "ebs_csi_driver_version" {
   type        = string
 }
 
+variable "ebs_storage_class_mount_options" {
+  default     = []
+  description = "EBS storage class mount options."
+  type        = list(string)
+}
+
+variable "ebs_storage_class_parameters" {
+  description = "EBS storage class parameters."
+  type        = any
+  default     = {}
+}
+
 variable "efs_csi_driver" {
   description = "Install and configure the EFS CSI storage driver."
   type        = bool
@@ -242,6 +254,23 @@ variable "efs_csi_driver_wait" {
   description = "Wait for the EFS CSI storage driver Helm chart install to complete."
   type        = bool
   default     = true
+}
+
+variable "efs_storage_class_mount_options" {
+  default     = []
+  description = "EFS storage class mount options."
+  type        = list(string)
+}
+
+variable "efs_storage_class_parameters" {
+  description = "EFS storage class parameters."
+  type        = any
+  default     = {
+    "provisioningMode" = "efs-ap"
+    "directoryPerms"   = "755"
+    "uid"              = "0"
+    "gid"              = "0"
+  }
 }
 
 variable "eks_managed_node_groups" {
