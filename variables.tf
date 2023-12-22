@@ -115,6 +115,36 @@ variable "create_node_security_group" {
   default     = true
 }
 
+variable "crossplane_namespace" {
+  default     = "crossplane-system"
+  description = "Namespace that Crossplane will use."
+  type        = string
+}
+
+variable "crossplane_policy_arns" {
+  default     = []
+  description = "Configure and install Crossplane with the given AWS IAM Policy ARNs."
+  type        = list(string)
+}
+
+variable "crossplane_values" {
+  description = "Additional custom values for the Crossplane Helm chart."
+  type        = any
+  default     = {}
+}
+
+variable "crossplane_wait" {
+  description = "Wait for the Crossplane Helm chart installation to complete."
+  type        = bool
+  default     = true
+}
+
+variable "crossplane_version" {
+  default     = "1.14.5"
+  description = "Version of Crossplane Helm chart to install."
+  type        = string
+}
+
 # The ECR repository is not the same for every region, in particular
 # those for govcloud:
 #   https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html
