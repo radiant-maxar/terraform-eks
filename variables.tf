@@ -106,7 +106,7 @@ variable "coredns" {
 variable "coredns_fargate" {
   description = "Indicates whether to configure CoreDNS for running in Fargate."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_node_security_group" {

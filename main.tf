@@ -77,9 +77,8 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   )
   cluster_addons_timeouts   = var.cluster_addons_timeouts
   cluster_enabled_log_types = var.cluster_enabled_log_types
-  # Fargate profiles use the cluster primary security group so these disabled
-  # for Karpenter as it expects only one security group to be tagged with
-  # `karpenter.sh/discovery`.
+  # Karpenter as only one security group to be tagged with `karpenter.sh/discovery`,
+  # so disable additional cluster/node security groups automatically.
   create_cluster_security_group = var.karpenter ? false : var.create_cluster_security_group
   create_node_security_group    = var.karpenter ? false : var.create_node_security_group
 
