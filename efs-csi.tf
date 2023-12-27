@@ -22,33 +22,21 @@ resource "aws_efs_mount_target" "eks_efs_private" {
 }
 
 # Allow PVCs backed by EFS
-module "eks_efs_csi_controller_irsa" {
+module "eks_efs_csi_driver_irsa" {
   count   = var.efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 
-  role_name = "${var.cluster_name}-efs-csi-controller-role"
+  role_name = "${var.cluster_name}-efs-csi-driver-role"
 
   oidc_providers = {
-    main = {
+    controller = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
         "${var.efs_csi_driver_namespace}:efs-csi-controller-sa",
       ]
     }
-  }
-  tags = var.tags
-}
-
-module "eks_efs_csi_node_irsa" {
-  count   = var.efs_csi_driver ? 1 : 0
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.33.0"
-
-  role_name = "${var.cluster_name}-efs-csi-node-role"
-
-  oidc_providers = {
-    main = {
+    node = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
         "${var.efs_csi_driver_namespace}:efs-csi-node-sa",
@@ -131,21 +119,12 @@ resource "aws_iam_policy" "eks_efs_csi_driver" {
   tags        = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "eks_efs_csi_controller" {
+resource "aws_iam_role_policy_attachment" "eks_efs_csi_driver" {
   count      = var.efs_csi_driver ? 1 : 0
-  role       = "${var.cluster_name}-efs-csi-controller-role"
+  role       = "${var.cluster_name}-efs-csi-driver-role"
   policy_arn = aws_iam_policy.eks_efs_csi_driver[0].arn
   depends_on = [
-    module.eks_efs_csi_controller_irsa[0]
-  ]
-}
-
-resource "aws_iam_role_policy_attachment" "eks_efs_csi_node" {
-  count      = var.efs_csi_driver ? 1 : 0
-  role       = "${var.cluster_name}-efs-csi-node-role"
-  policy_arn = aws_iam_policy.eks_efs_csi_driver[0].arn
-  depends_on = [
-    module.eks_efs_csi_node_irsa[0]
+    module.eks_efs_csi_driver_irsa[0]
   ]
 }
 
@@ -164,7 +143,7 @@ resource "helm_release" "aws_efs_csi_driver" {
       "controller" = {
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
           }
         }
         "tags" = var.tags
@@ -175,7 +154,7 @@ resource "helm_release" "aws_efs_csi_driver" {
       "node" = {
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
           }
         }
       }
@@ -184,7 +163,7 @@ resource "helm_release" "aws_efs_csi_driver" {
   ]
 
   depends_on = [
-    module.eks_efs_csi_controller_irsa[0],
+    module.eks_efs_csi_driver_irsa[0],
     module.eks,
   ]
 }
