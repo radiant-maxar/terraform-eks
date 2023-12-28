@@ -446,6 +446,12 @@ variable "nvidia_gpu_operator_namespace" {
   type        = string
 }
 
+variable "nvidia_gpu_operator_values" {
+  description = "Additional custom values for the NVIDIA GPU Operator Helm chart."
+  type        = any
+  default     = {}
+}
+
 variable "nvidia_gpu_operator_version" {
   default     = "23.9.1"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
