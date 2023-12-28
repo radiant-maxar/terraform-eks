@@ -1,42 +1,42 @@
 ## EFS CSI Storage Driver
 
 locals {
-  efs_arns = [
-    "arn:${local.aws_partition}:elasticfilesystem:${local.aws_region}:${local.aws_account_id}:file-system/*"
-  ]
   efs_access_point_arns = [
     "arn:${local.aws_partition}:elasticfilesystem:${local.aws_region}:${local.aws_account_id}:access-point/*"
   ]
 }
 
+resource "aws_efs_file_system" "eks_efs" {
+  count          = var.efs_csi_driver ? 1 : 0
+  creation_token = "${var.cluster_name}-efs"
+  encrypted      = true
+  kms_key_id     = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
+  tags           = var.tags
+}
+
+resource "aws_efs_mount_target" "eks_efs_private" {
+  count           = var.efs_csi_driver ? length(var.private_subnets) : 0
+  file_system_id  = aws_efs_file_system.eks_efs[0].id
+  subnet_id       = var.private_subnets[count.index]
+  security_groups = [module.eks.cluster_primary_security_group_id]
+}
+
 # Allow PVCs backed by EFS
-module "eks_efs_csi_controller_irsa" {
+module "eks_efs_csi_driver_irsa" {
   count   = var.efs_csi_driver ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 
-  role_name = "${var.cluster_name}-efs-csi-controller-role"
+  role_name = "${var.cluster_name}-efs-csi-driver-role"
 
   oidc_providers = {
-    main = {
+    controller = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
         "${var.efs_csi_driver_namespace}:efs-csi-controller-sa",
       ]
     }
-  }
-  tags = var.tags
-}
-
-module "eks_efs_csi_node_irsa" {
-  count   = var.efs_csi_driver ? 1 : 0
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.33.0"
-
-  role_name = "${var.cluster_name}-efs-csi-node-role"
-
-  oidc_providers = {
-    main = {
+    node = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
         "${var.efs_csi_driver_namespace}:efs-csi-node-sa",
@@ -63,7 +63,7 @@ data "aws_iam_policy_document" "eks_efs_csi_driver" {
       "elasticfilesystem:DescribeMountTargets"
     ]
     resources = flatten([
-      local.efs_arns,
+      aws_efs_file_system.eks_efs[*].arn,
       local.efs_access_point_arns,
     ])
   }
@@ -73,7 +73,7 @@ data "aws_iam_policy_document" "eks_efs_csi_driver" {
       "elasticfilesystem:CreateAccessPoint",
       "elasticfilesystem:TagResource",
     ]
-    resources = local.efs_arns
+    resources = aws_efs_file_system.eks_efs[*].arn
 
     condition {
       test     = "StringLike"
@@ -101,7 +101,7 @@ data "aws_iam_policy_document" "eks_efs_csi_driver" {
       "elasticfilesystem:ClientWrite",
       "elasticfilesystem:ClientMount",
     ]
-    resources = local.efs_arns
+    resources = aws_efs_file_system.eks_efs[*].arn
 
     condition {
       test     = "Bool"
@@ -119,37 +119,13 @@ resource "aws_iam_policy" "eks_efs_csi_driver" {
   tags        = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "eks_efs_csi_controller" {
+resource "aws_iam_role_policy_attachment" "eks_efs_csi_driver" {
   count      = var.efs_csi_driver ? 1 : 0
-  role       = "${var.cluster_name}-efs-csi-controller-role"
+  role       = "${var.cluster_name}-efs-csi-driver-role"
   policy_arn = aws_iam_policy.eks_efs_csi_driver[0].arn
   depends_on = [
-    module.eks_efs_csi_controller_irsa[0]
+    module.eks_efs_csi_driver_irsa[0]
   ]
-}
-
-resource "aws_iam_role_policy_attachment" "eks_efs_csi_node" {
-  count      = var.efs_csi_driver ? 1 : 0
-  role       = "${var.cluster_name}-efs-csi-node-role"
-  policy_arn = aws_iam_policy.eks_efs_csi_driver[0].arn
-  depends_on = [
-    module.eks_efs_csi_node_irsa[0]
-  ]
-}
-
-resource "aws_efs_file_system" "eks_efs" {
-  count          = var.efs_csi_driver ? 1 : 0
-  creation_token = "${var.cluster_name}-efs"
-  encrypted      = true
-  kms_key_id     = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
-  tags           = var.tags
-}
-
-resource "aws_efs_mount_target" "eks_efs_private" {
-  count           = var.efs_csi_driver ? length(var.private_subnets) : 0
-  file_system_id  = aws_efs_file_system.eks_efs[0].id
-  subnet_id       = var.private_subnets[count.index]
-  security_groups = [module.eks.cluster_primary_security_group_id]
 }
 
 resource "helm_release" "aws_efs_csi_driver" {
@@ -162,13 +138,12 @@ resource "helm_release" "aws_efs_csi_driver" {
   version          = var.efs_csi_driver_version
   wait             = var.efs_csi_driver_wait
 
-
   values = [
     yamlencode({
       "controller" = {
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-controller-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
           }
         }
         "tags" = var.tags
@@ -179,7 +154,7 @@ resource "helm_release" "aws_efs_csi_driver" {
       "node" = {
         "serviceAccount" = {
           "annotations" = {
-            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-node-role"
+            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
           }
         }
       }
@@ -188,7 +163,7 @@ resource "helm_release" "aws_efs_csi_driver" {
   ]
 
   depends_on = [
-    module.eks_efs_csi_controller_irsa[0],
+    module.eks_efs_csi_driver_irsa[0],
     module.eks,
   ]
 }
@@ -202,14 +177,11 @@ resource "kubernetes_storage_class" "eks_efs_storage_class" {
     labels      = {}
   }
 
-  mount_options = []
-  parameters = {
-    "provisioningMode" = "efs-ap"
-    "fileSystemId"     = aws_efs_file_system.eks_efs[0].id
-    "directoryPerms"   = "755"
-    "uid"              = "0"
-    "gid"              = "0"
-  }
+  mount_options = var.efs_storage_class_mount_options
+  parameters = merge(
+    var.efs_storage_class_parameters,
+    { "fileSystemId" = aws_efs_file_system.eks_efs[0].id }
+  )
   storage_provisioner = "efs.csi.aws.com"
 
   depends_on = [

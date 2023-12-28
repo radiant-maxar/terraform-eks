@@ -3,6 +3,9 @@ data "aws_partition" "current" {}
 data "aws_region" "current" {}
 
 locals {
+  addon_defaults = {
+    most_recent = var.cluster_addons_most_recent
+  }
   aws_account_id = data.aws_caller_identity.current.account_id
   aws_partition  = data.aws_partition.current.partition
   aws_region     = data.aws_region.current.name
@@ -27,6 +30,21 @@ locals {
     local.aws_auth_karpenter_roles,
     var.aws_auth_roles
   )
+  coredns_addon_defaults = var.coredns_fargate ? {
+    configuration_values = jsonencode({
+      computeType = "Fargate"
+      resources = {
+        limits = {
+          cpu    = "0.25"
+          memory = "256M"
+        }
+        requests = {
+          cpu    = "0.25"
+          memory = "256M"
+        }
+      }
+    })
+  } : {}
 }
 
 # EKS Cluster
@@ -38,29 +56,31 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_version = var.kubernetes_version
 
   cluster_addons = merge(
-    var.cluster_addons_coredns ? {
-      coredns = {
-        most_recent = var.cluster_addons_most_recent
-      }
+    var.coredns ? {
+      coredns = merge(local.addon_defaults, local.coredns_addon_defaults)
     } : {},
-    {
-      eks-pod-identity-agent = {
-        most_recent = var.cluster_addons_most_recent
-      }
-      kube-proxy = {
-        most_recent = var.cluster_addons_most_recent
-      }
-      vpc-cni = {
-        most_recent              = var.cluster_addons_most_recent
-        service_account_role_arn = module.eks_vpc_cni_irsa.iam_role_arn
-      }
-    },
+    var.eks_pod_identity_agent ? {
+      "eks-pod-identity-agent" = local.addon_defaults
+    } : {},
+    var.kube_proxy ? {
+      "kube-proxy" = local.addon_defaults
+    } : {},
+    var.vpc_cni ? {
+      "vpc-cni" = merge(
+        local.addon_defaults,
+        {
+          service_account_role_arn = module.eks_vpc_cni_irsa[0].iam_role_arn
+        }
+      )
+    } : {},
     var.cluster_addons_overrides
   )
-  cluster_addons_timeouts       = var.cluster_addons_timeouts
-  cluster_enabled_log_types     = var.cluster_enabled_log_types
-  create_cluster_security_group = var.create_cluster_security_group
-  create_node_security_group    = var.create_node_security_group
+  cluster_addons_timeouts   = var.cluster_addons_timeouts
+  cluster_enabled_log_types = var.cluster_enabled_log_types
+  # Karpenter as only one security group to be tagged with `karpenter.sh/discovery`,
+  # so disable additional cluster/node security groups automatically.
+  create_cluster_security_group = var.karpenter ? false : var.create_cluster_security_group
+  create_node_security_group    = var.karpenter ? false : var.create_node_security_group
 
   cluster_encryption_config = var.kms_manage ? {
     provider_key_arn = aws_kms_key.this[0].arn

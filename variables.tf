@@ -12,7 +12,7 @@ variable "cert_manager_namespace" {
 
 variable "cert_manager_values" {
   description = "Additional custom values for the cert-manager Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -34,12 +34,6 @@ variable "cert_manager_route53_zone_id" {
   type        = string
 }
 
-variable "cluster_addons_coredns" {
-  description = "Indicates whether to install the CoreDNS cluster addon."
-  type        = bool
-  default     = true
-}
-
 variable "cluster_addons_most_recent" {
   description = "Indicates whether to use the most recent version of cluster addons"
   type        = bool
@@ -48,7 +42,7 @@ variable "cluster_addons_most_recent" {
 
 variable "cluster_addons_overrides" {
   description = "Override parameters for cluster addons."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -103,10 +97,58 @@ variable "create_cluster_security_group" {
   default     = true
 }
 
+variable "coredns" {
+  description = "Indicates whether to install the CoreDNS cluster addon."
+  type        = bool
+  default     = true
+}
+
+variable "coredns_fargate" {
+  description = "Indicates whether to configure CoreDNS for running in Fargate."
+  type        = bool
+  default     = false
+}
+
 variable "create_node_security_group" {
   description = "Determines whether to create a security group for the node groups or use the existing `node_security_group_id`"
   type        = bool
   default     = true
+}
+
+variable "crossplane" {
+  description = "Indicates whether to install Crossplane."
+  type        = bool
+  default     = false
+}
+
+variable "crossplane_namespace" {
+  default     = "crossplane-system"
+  description = "Namespace that Crossplane will use."
+  type        = string
+}
+
+variable "crossplane_policy_arns" {
+  default     = []
+  description = "Configure and install Crossplane with the given AWS IAM Policy ARNs."
+  type        = list(string)
+}
+
+variable "crossplane_values" {
+  description = "Additional custom values for the Crossplane Helm chart."
+  type        = any
+  default     = {}
+}
+
+variable "crossplane_wait" {
+  description = "Wait for the Crossplane Helm chart installation to complete."
+  type        = bool
+  default     = true
+}
+
+variable "crossplane_version" {
+  default     = "1.14.5"
+  description = "Version of Crossplane Helm chart to install."
+  type        = string
 }
 
 # The ECR repository is not the same for every region, in particular
@@ -162,7 +204,7 @@ variable "ebs_csi_driver_namespace" {
 
 variable "ebs_csi_driver_values" {
   description = "Additional custom values for the EBS CSI Driver Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -173,9 +215,21 @@ variable "ebs_csi_driver_wait" {
 }
 
 variable "ebs_csi_driver_version" {
-  default     = "2.25.0"
+  default     = "2.26.0"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
+}
+
+variable "ebs_storage_class_mount_options" {
+  default     = []
+  description = "EBS storage class mount options."
+  type        = list(string)
+}
+
+variable "ebs_storage_class_parameters" {
+  description = "EBS storage class parameters."
+  type        = any
+  default     = {}
 }
 
 variable "efs_csi_driver" {
@@ -192,7 +246,7 @@ variable "efs_csi_driver_namespace" {
 
 variable "efs_csi_driver_values" {
   description = "Additional custom values for the EFS CSI Driver Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -208,10 +262,33 @@ variable "efs_csi_driver_wait" {
   default     = true
 }
 
+variable "efs_storage_class_mount_options" {
+  default     = []
+  description = "EFS storage class mount options."
+  type        = list(string)
+}
+
+variable "efs_storage_class_parameters" {
+  description = "EFS storage class parameters."
+  type        = any
+  default = {
+    "provisioningMode" = "efs-ap"
+    "directoryPerms"   = "755"
+    "uid"              = "0"
+    "gid"              = "0"
+  }
+}
+
 variable "eks_managed_node_groups" {
   description = "Map of managed node groups for the EKS cluster."
   type        = map(any)
   default     = {}
+}
+
+variable "eks_pod_identity_agent" {
+  description = "Indicates whether to install the eks-pod-identity-agent cluster addon."
+  type        = bool
+  default     = true
 }
 
 variable "fargate_profiles" {
@@ -222,7 +299,7 @@ variable "fargate_profiles" {
 
 variable "fargate_profile_defaults" {
   description = "Map of Fargate Profile default configurations."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -245,14 +322,14 @@ variable "karpenter" {
 }
 
 variable "karpenter_namespace" {
-  default     = "karpenter"
+  default     = "kube-system"
   description = "Namespace that Karpenter will use."
   type        = string
 }
 
 variable "karpenter_values" {
   description = "Additional custom values to use when installing the Karpenter Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -286,6 +363,12 @@ variable "kms_key_enable_default_policy" {
   default     = true
 }
 
+variable "kube_proxy" {
+  description = "Indicates whether to install the kube-proxy cluster addon."
+  type        = bool
+  default     = true
+}
+
 variable "kubernetes_version" {
   default     = "1.28"
   description = "Kubernetes version to use for the EKS cluster."
@@ -306,7 +389,7 @@ variable "lb_controller_namespace" {
 
 variable "lb_controller_values" {
   description = "Additional custom values for the AWS Load Balancer Controller Helm chart."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -358,7 +441,7 @@ variable "nvidia_gpu_operator" {
 }
 
 variable "nvidia_gpu_operator_namespace" {
-  default     = "nvidia-gpu-operator"
+  default     = "gpu-operator"
   description = "Namespace that NVIDIA GPU Operator will use."
   type        = string
 }
@@ -405,4 +488,10 @@ variable "vpc_cidr" {
 variable "vpc_id" {
   description = "EKS Cluster VPC ID"
   type        = string
+}
+
+variable "vpc_cni" {
+  description = "Indicates whether to install the vpc-cni cluster addon."
+  type        = bool
+  default     = true
 }
