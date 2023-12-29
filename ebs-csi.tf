@@ -43,7 +43,7 @@ resource "kubernetes_storage_class" "eks_ebs_storage_class" {
   volume_binding_mode = "WaitForFirstConsumer"
 
   depends_on = [
-    helm_release.aws_ebs_csi_driver[0],
+    module.eks,
   ]
 }
 
