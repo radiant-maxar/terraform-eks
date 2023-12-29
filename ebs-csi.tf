@@ -8,6 +8,7 @@ module "eks_ebs_csi_irsa" {
 
   role_name             = "${var.cluster_name}-ebs-csi-role"
   attach_ebs_csi_policy = true
+  ebs_csi_kms_cmk_ids   = [var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn]
 
   oidc_providers = {
     main = {
@@ -64,8 +65,13 @@ resource "kubernetes_storage_class" "eks_ebs_storage_class" {
     name   = "ebs-sc"
   }
 
-  mount_options       = var.ebs_storage_class_mount_options
-  parameters          = var.ebs_storage_class_parameters
+  mount_options = var.ebs_storage_class_mount_options
+  parameters = merge(
+    var.ebs_storage_class_parameters,
+    {
+      kmsKeyId = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
+    }
+  )
   storage_provisioner = "ebs.csi.aws.com"
   volume_binding_mode = "WaitForFirstConsumer"
 

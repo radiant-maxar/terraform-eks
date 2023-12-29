@@ -48,6 +48,11 @@ output "kms_key_arn" {
   value       = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
 }
 
+output "kms_key_id" {
+  description = "The globally unique identifier for the EKS KMS cluster key"
+  value       = var.kms_manage ? aws_kms_key.this[0].id : module.eks.kms_key_id
+}
+
 output "node_security_group_arn" {
   description = "ARN of the EKS node shared security group"
   value       = module.eks.node_security_group_arn
