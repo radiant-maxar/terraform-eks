@@ -468,6 +468,18 @@ variable "public_subnets" {
   type        = list(any)
 }
 
+variable "snapshot_controller" {
+  description = "Indicates whether to install the snapshot-controller cluster addon."
+  type        = bool
+  default     = true
+}
+
+variable "snapshot_controller_options" {
+  description = "Custom options for the snapshot-controller addon."
+  type        = any
+  default     = {}
+}
+
 variable "system_masters_roles" {
   default     = ["PowerUsers"]
   description = "Roles from the AWS account allowed system:masters to the EKS cluster."
