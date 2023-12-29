@@ -291,7 +291,7 @@ variable "eks_pod_identity_agent" {
   default     = true
 }
 
-variable "eks_pod_identity_options" {
+variable "eks_pod_identity_agent_options" {
   description = "Custom options for the eks-pod-identity-agent addon."
   type        = any
   default     = {}
