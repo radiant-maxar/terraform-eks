@@ -1,5 +1,5 @@
 locals {
-  s3_csi_driver_policy    = len(var.s3_csi_driver_bucket_name) > 0
+  s3_csi_driver_policy    = length(var.s3_csi_driver_bucket_name) > 0
   s3_csi_driver_role_name = "${var.cluster_name}-s3-csi-driver-role"
 }
 
