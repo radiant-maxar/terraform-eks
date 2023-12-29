@@ -46,9 +46,11 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
         local.addon_defaults,
         {
           configuration_values = jsonencode({
-            extraVolumeTags = {
-              for key, value in var.tags : key => value
-              if key != "Name"
+            controller = {
+              extraVolumeTags = {
+                for key, value in var.tags : key => value
+                if key != "Name"
+              }
             }
           })
           service_account_role_arn = module.eks_ebs_csi_irsa[0].iam_role_arn
