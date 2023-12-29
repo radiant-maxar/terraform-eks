@@ -41,13 +41,6 @@ resource "helm_release" "aws_lb_controller" {
         }
         name = "aws-load-balancer-controller"
       }
-      topologySpreadConstraints = [
-        {
-          maxSkew           = 1
-          topologyKey       = "topology.kubernetes.io/zone"
-          whenUnsatisfiable = "ScheduleAnyway"
-        }
-      ]
       vpcId = var.vpc_id
     }),
     yamlencode(var.lb_controller_values),

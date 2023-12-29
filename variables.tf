@@ -103,10 +103,10 @@ variable "coredns" {
   default     = true
 }
 
-variable "coredns_fargate" {
-  description = "Indicates whether to configure CoreDNS for running in Fargate."
-  type        = bool
-  default     = false
+variable "coredns_options" {
+  description = "Custom options for the CoreDNS addon."
+  type        = any
+  default     = {}
 }
 
 variable "create_node_security_group" {
@@ -291,6 +291,12 @@ variable "eks_pod_identity_agent" {
   default     = true
 }
 
+variable "eks_pod_identity_options" {
+  description = "Custom options for the eks-pod-identity-agent addon."
+  type        = any
+  default     = {}
+}
+
 variable "fargate_profiles" {
   description = "Map of Fargate Profile definitions to create."
   type        = map(any)
@@ -367,6 +373,12 @@ variable "kube_proxy" {
   description = "Indicates whether to install the kube-proxy cluster addon."
   type        = bool
   default     = true
+}
+
+variable "kube_proxy_options" {
+  description = "Custom options for the kube-proxy addon."
+  type        = any
+  default     = {}
 }
 
 variable "kubernetes_version" {
@@ -500,4 +512,10 @@ variable "vpc_cni" {
   description = "Indicates whether to install the vpc-cni cluster addon."
   type        = bool
   default     = true
+}
+
+variable "vpc_cni_options" {
+  description = "Custom options for the vpc-cni addon."
+  type        = any
+  default     = {}
 }

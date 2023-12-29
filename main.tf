@@ -30,28 +30,6 @@ locals {
     local.aws_auth_karpenter_roles,
     var.aws_auth_roles
   )
-  coredns_addon_defaults = var.coredns_fargate ? {
-    configuration_values = jsonencode({
-      computeType = "Fargate"
-      resources = {
-        limits = {
-          cpu    = "0.25"
-          memory = "256M"
-        }
-        requests = {
-          cpu    = "0.25"
-          memory = "256M"
-        }
-      }
-      topologySpreadConstraints = [
-        {
-          maxSkew           = 1
-          topologyKey       = "topology.kubernetes.io/zone"
-          whenUnsatisfiable = "ScheduleAnyway"
-        }
-      ]
-    })
-  } : {}
 }
 
 # EKS Cluster
@@ -64,20 +42,21 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
 
   cluster_addons = merge(
     var.coredns ? {
-      coredns = merge(local.addon_defaults, local.coredns_addon_defaults)
+      coredns = merge(local.addon_defaults, var.coredns_options)
     } : {},
     var.eks_pod_identity_agent ? {
-      "eks-pod-identity-agent" = local.addon_defaults
+      "eks-pod-identity-agent" = merge(local.addon_defaults, var.eks_pod_identity_agent_options)
     } : {},
     var.kube_proxy ? {
-      "kube-proxy" = local.addon_defaults
+      "kube-proxy" = merge(local.addon_defaults, var.kube_proxy_options)
     } : {},
     var.vpc_cni ? {
       "vpc-cni" = merge(
         local.addon_defaults,
         {
           service_account_role_arn = module.eks_vpc_cni_irsa[0].iam_role_arn
-        }
+        },
+        var.vpc_cni_options
       )
     } : {},
     var.cluster_addons_overrides

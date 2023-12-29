@@ -141,7 +141,6 @@ resource "helm_release" "aws_efs_csi_driver" {
   values = [
     yamlencode({
       controller = {
-        # Use `podAntiAffinity` since the EFS chart doesn't support `topologySpreadConstraints`.
         serviceAccount = {
           annotations = {
             "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
