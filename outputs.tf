@@ -75,10 +75,10 @@ output "oidc_provider_arn" {
 
 output "s3_csi_driver_role_arn" {
   description = "The S3 CSI Storage Driver IRSA role Amazon Resource Name (ARN)"
-  value       = var.s3_csi_driver ? eks_s3_csi_driver_irsa[0].iam_role_arn : null
+  value       = var.s3_csi_driver ? module.eks_s3_csi_driver_irsa[0].iam_role_arn : null
 }
 
 output "s3_csi_driver_role_name" {
   description = "The S3 CSI Storage Driver IRSA role name"
-  value       = var.s3_csi_driver ? eks_s3_csi_driver_irsa[0].iam_role_name : null
+  value       = var.s3_csi_driver ? module.eks_s3_csi_driver_irsa[0].iam_role_name : null
 }
