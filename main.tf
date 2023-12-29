@@ -30,6 +30,10 @@ locals {
     local.aws_auth_karpenter_roles,
     var.aws_auth_roles
   )
+  tags_noname = {
+    for key, value in var.tags : key => value
+    if key != "Name"
+  }
 }
 
 # EKS Cluster
@@ -47,10 +51,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
         {
           configuration_values = jsonencode({
             controller = {
-              extraVolumeTags = {
-                for key, value in var.tags : key => value
-                if key != "Name"
-              }
+              extraVolumeTags = local.tags_noname
             }
           })
           service_account_role_arn = module.eks_ebs_csi_irsa[0].iam_role_arn
