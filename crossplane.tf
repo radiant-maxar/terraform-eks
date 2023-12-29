@@ -40,7 +40,7 @@ resource "helm_release" "crossplane" {
     yamlencode({
       serviceAccount = {
         annotations = {
-          "eks.amazonaws.com/role-arn" = module.crossplane_irsa.iam_role_arn
+          "eks.amazonaws.com/role-arn" = module.crossplane_irsa[0].iam_role_arn
         }
       }
     }),
