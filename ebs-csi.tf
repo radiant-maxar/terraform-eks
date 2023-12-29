@@ -69,7 +69,7 @@ resource "kubernetes_storage_class" "eks_ebs_storage_class" {
   parameters = merge(
     var.ebs_storage_class_parameters,
     {
-      kmsKeyId = var.kms_manage ? aws_kms_key.this[0].arn : module.eks.kms_key_arn
+      kmsKeyId = var.kms_manage ? aws_kms_key.this[0].id : module.eks.kms_key_id
     }
   )
   storage_provisioner = "ebs.csi.aws.com"
