@@ -196,28 +196,10 @@ variable "ebs_csi_driver" {
   default     = true
 }
 
-variable "ebs_csi_driver_namespace" {
-  default     = "kube-system"
-  description = "Namespace that EBS CSI storage driver will use."
-  type        = string
-}
-
-variable "ebs_csi_driver_values" {
+variable "ebs_csi_driver_options" {
   description = "Additional custom values for the EBS CSI Driver Helm chart."
   type        = any
   default     = {}
-}
-
-variable "ebs_csi_driver_wait" {
-  description = "Wait for the EBS CSI storage driver Helm chart install to complete."
-  type        = bool
-  default     = true
-}
-
-variable "ebs_csi_driver_version" {
-  default     = "2.26.0"
-  description = "Version of the EFS CSI storage driver to install."
-  type        = string
 }
 
 variable "ebs_storage_class_mount_options" {

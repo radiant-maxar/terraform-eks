@@ -13,44 +13,11 @@ module "eks_ebs_csi_irsa" {
   oidc_providers = {
     main = {
       provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["${var.ebs_csi_driver_namespace}:ebs-csi-controller-sa"]
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
     }
   }
 
   tags = var.tags
-}
-
-resource "helm_release" "aws_ebs_csi_driver" {
-  count            = var.ebs_csi_driver ? 1 : 0
-  chart            = "aws-ebs-csi-driver"
-  create_namespace = var.ebs_csi_driver_namespace == "kube-system" ? false : true
-  name             = "aws-ebs-csi-driver"
-  namespace        = var.ebs_csi_driver_namespace
-  repository       = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
-  version          = var.ebs_csi_driver_version
-  wait             = var.ebs_csi_driver_wait
-
-  values = [
-    yamlencode({
-      controller = {
-        extraVolumeTags = var.tags
-        serviceAccount = {
-          annotations = {
-            "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
-          }
-        }
-      }
-      image = {
-        repository = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
-      }
-    }),
-    yamlencode(var.ebs_csi_driver_values),
-  ]
-
-  depends_on = [
-    module.eks_ebs_csi_irsa[0],
-    module.eks,
-  ]
 }
 
 # Make EBS CSI with gp3 default storage driver

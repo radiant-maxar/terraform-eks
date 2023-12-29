@@ -41,6 +41,15 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_version = var.kubernetes_version
 
   cluster_addons = merge(
+    var.ebs_csi_driver ? {
+      "aws-ebs-csi-driver" = merge(
+        local.addon_defaults,
+        {
+          service_account_role_arn = module.eks_ebs_csi_irsa[0].iam_role_arn
+        },
+        var.ebs_csi_driver_options
+      )
+    } : {},
     var.coredns ? {
       coredns = merge(local.addon_defaults, var.coredns_options)
     } : {},
