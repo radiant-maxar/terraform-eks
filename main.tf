@@ -57,6 +57,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
         },
         var.ebs_csi_driver_options
       )
+      "snapshot-controller" = local.addon_defaults
     } : {},
     var.coredns ? {
       coredns = merge(local.addon_defaults, var.coredns_options)
