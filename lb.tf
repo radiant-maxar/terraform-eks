@@ -36,7 +36,7 @@ resource "helm_release" "aws_lb_controller" {
       region      = local.aws_region
       serviceAccount = {
         annotations = {
-          "eks.amazonaws.com/role-arn"               = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-lb-role"
+          "eks.amazonaws.com/role-arn"               = module.eks_lb_irsa[0].iam_role_arn
           "eks.amazonaws.com/sts-regional-endpoints" = "true"
         }
         name = "aws-load-balancer-controller"

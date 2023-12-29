@@ -49,7 +49,7 @@ resource "aws_iam_policy" "cert_manager" {
 
 resource "aws_iam_role_policy_attachment" "cert_manager" {
   count      = local.cert_manager ? 1 : 0
-  role       = "${var.cluster_name}-cert-manager-role"
+  role       = module.cert_manager_irsa[0].iam_role_name
   policy_arn = aws_iam_policy.cert_manager[0].arn
   depends_on = [
     module.cert_manager_irsa[0]
@@ -74,13 +74,13 @@ resource "helm_release" "cert_manager" {
   # https://cert-manager.io/docs/configuration/acme/dns01/route53/#service-annotation
   values = [
     yamlencode({
-      "installCRDs" = true
-      "securityContext" = {
-        "fsGroup" = 1001
+      installCRDs = true
+      securityContext = {
+        fsGroup = 1001
       }
-      "serviceAccount" = {
-        "annotations" = {
-          "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-cert-manager-role"
+      serviceAccount = {
+        annotations = {
+          "eks.amazonaws.com/role-arn" = module.cert_manager_irsa[0].iam_role_arn
         }
       }
     }),
