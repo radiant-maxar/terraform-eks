@@ -1,10 +1,10 @@
 ## cert-manager
 locals {
-  cert_manager = length(var.cert_manager_route53_zone_id) > 0
+  cert_manager_policy = var.cert_manager && length(var.cert_manager_route53_zone_id) > 0
 }
 
 module "cert_manager_irsa" {
-  count   = local.cert_manager ? 1 : 0
+  count   = var.cert_manager ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 
@@ -22,7 +22,7 @@ module "cert_manager_irsa" {
 }
 
 data "aws_iam_policy_document" "cert_manager" {
-  count = local.cert_manager ? 1 : 0
+  count = local.cert_manager_policy ? 1 : 0
   statement {
     actions = [
       "route53:GetChange"
@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "cert_manager" {
 }
 
 resource "aws_iam_policy" "cert_manager" {
-  count       = local.cert_manager ? 1 : 0
+  count       = local.cert_manager_policy ? 1 : 0
   name        = "AmazonEKS_Cert_Manager_Policy-${var.cluster_name}"
   description = "Provides permissions for cert-manager"
   policy      = data.aws_iam_policy_document.cert_manager[0].json
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "cert_manager" {
 }
 
 resource "aws_iam_role_policy_attachment" "cert_manager" {
-  count      = local.cert_manager ? 1 : 0
+  count      = local.cert_manager_policy ? 1 : 0
   role       = module.cert_manager_irsa[0].iam_role_name
   policy_arn = aws_iam_policy.cert_manager[0].arn
   depends_on = [
@@ -57,7 +57,7 @@ resource "aws_iam_role_policy_attachment" "cert_manager" {
 }
 
 resource "helm_release" "cert_manager" {
-  count            = local.cert_manager ? 1 : 0
+  count            = var.cert_manager ? 1 : 0
   name             = "cert-manager"
   namespace        = var.cert_manager_namespace
   create_namespace = var.cert_manager_namespace == "kube-system" ? false : true

@@ -1,6 +1,5 @@
 locals {
-  s3_csi_driver_policy    = length(var.s3_csi_driver_bucket_name) > 0
-  s3_csi_driver_role_name = "${var.cluster_name}-s3-csi-driver-role"
+  s3_csi_driver_policy = var.s3_csi_driver && length(var.s3_csi_driver_bucket_name) > 0
 }
 
 module "eks_s3_csi_driver_irsa" {
@@ -9,7 +8,7 @@ module "eks_s3_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.33.0"
 
-  role_name = local.s3_csi_driver_role_name
+  role_name = "${var.cluster_name}-s3-csi-driver-role"
 
   oidc_providers = {
     main = {

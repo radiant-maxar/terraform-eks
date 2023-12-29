@@ -4,9 +4,21 @@ variable "aws_auth_roles" {
   default     = []
 }
 
+variable "cert_manager" {
+  description = "Install the cert-manager Helm chart when set."
+  type        = bool
+  default     = false
+}
+
 variable "cert_manager_namespace" {
   default     = "cert-manager"
   description = "Namespace that cert-manager will use."
+  type        = string
+}
+
+variable "cert_manager_route53_zone_id" {
+  default     = ""
+  description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
   type        = string
 }
 
@@ -16,22 +28,16 @@ variable "cert_manager_values" {
   default     = {}
 }
 
-variable "cert_manager_wait" {
-  description = "Wait for the cert-manager Helm chart installation to complete."
-  type        = bool
-  default     = true
-}
-
 variable "cert_manager_version" {
   default     = "1.13.3"
   description = "Version of cert-manager to install."
   type        = string
 }
 
-variable "cert_manager_route53_zone_id" {
-  default     = ""
-  description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
-  type        = string
+variable "cert_manager_wait" {
+  description = "Wait for the cert-manager Helm chart installation to complete."
+  type        = bool
+  default     = true
 }
 
 variable "cluster_addons_most_recent" {

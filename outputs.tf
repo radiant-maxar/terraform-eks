@@ -1,3 +1,13 @@
+output "cert_manager_role_arn" {
+  description = "The cert-manager IRSA role Amazon Resource Name (ARN)"
+  value       = var.cert_manager ? module.cert_manager_irsa[0].iam_role_arn : null
+}
+
+output "cert_manager_role_name" {
+  description = "The cert-manager IRSA role name"
+  value       = var.cert_manager ? module.cert_manager_irsa[0].iam_role_name : null
+}
+
 output "cluster_certificate_authority_data" {
   description = "Base64 encoded certificate data required to communicate with the cluster"
   value       = module.eks.cluster_certificate_authority_data
@@ -16,6 +26,36 @@ output "cluster_oidc_issuer_url" {
 output "cluster_primary_security_group_id" {
   description = "Cluster security group that was created by Amazon EKS for the cluster. Managed node groups use this security group for control-plane-to-data-plane communication. Referred to as 'Cluster security group' in the EKS console"
   value       = module.eks.cluster_primary_security_group_id
+}
+
+output "crossplane_role_arn" {
+  description = "The Crossplane IRSA role Amazon Resource Name (ARN)"
+  value       = var.crossplane ? module.crossplane_irsa[0].iam_role_arn : null
+}
+
+output "crossplane_role_name" {
+  description = "The Crossplane IRSA role name"
+  value       = var.crossplane ? module.crossplane_irsa[0].iam_role_name : null
+}
+
+output "ebs_csi_driver_role_arn" {
+  description = "The EBS CSI Storage Driver IRSA role Amazon Resource Name (ARN)"
+  value       = var.ebs_csi_driver ? module.eks_ebs_csi_irsa[0].iam_role_arn : null
+}
+
+output "ebs_csi_driver_role_name" {
+  description = "The EBS CSI Storage Driver IRSA role name"
+  value       = var.ebs_csi_driver ? module.eks_ebs_csi_irsa[0].iam_role_name : null
+}
+
+output "efs_csi_driver_role_arn" {
+  description = "The EFS CSI Storage Driver IRSA role Amazon Resource Name (ARN)"
+  value       = var.efs_csi_driver ? module.eks_efs_csi_driver_irsa[0].iam_role_arn : null
+}
+
+output "efs_csi_driver_role_name" {
+  description = "The EFS CSI Storage Driver IRSA role name"
+  value       = var.efs_csi_driver ? module.eks_efs_csi_driver_irsa[0].iam_role_name : null
 }
 
 output "eks_managed_node_groups" {
@@ -51,6 +91,16 @@ output "kms_key_arn" {
 output "kms_key_id" {
   description = "The globally unique identifier for the EKS KMS cluster key"
   value       = var.kms_manage ? aws_kms_key.this[0].id : module.eks.kms_key_id
+}
+
+output "lb_controller_role_arn" {
+  description = "The AWS Load Balancer Controller IRSA role Amazon Resource Name (ARN)"
+  value       = var.lb_controller ? module.eks_lb_irsa[0].iam_role_arn : null
+}
+
+output "lb_controller_role_name" {
+  description = "The AWS Load Balancer Controller IRSA role name"
+  value       = var.lb_controller ? module.eks_lb_irsa[0].iam_role_name : null
 }
 
 output "node_security_group_arn" {
