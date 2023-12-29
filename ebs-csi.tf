@@ -31,16 +31,23 @@ resource "helm_release" "aws_ebs_csi_driver" {
 
   values = [
     yamlencode({
-      "controller" = {
-        "extraVolumeTags" = var.tags
-        "serviceAccount" = {
-          "annotations" = {
+      controller = {
+        extraVolumeTags = var.tags
+        serviceAccount = {
+          annotations = {
             "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-ebs-csi-role"
           }
         }
+        topologySpreadConstraints = [
+          {
+            maxSkew           = 1
+            topologyKey       = "topology.kubernetes.io/zone"
+            whenUnsatisfiable = "ScheduleAnyway"
+          }
+        ]
       }
-      "image" = {
-        "repository" = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
+      image = {
+        repository = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-ebs-csi-driver"
       }
     }),
     yamlencode(var.ebs_csi_driver_values),

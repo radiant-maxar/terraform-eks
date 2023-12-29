@@ -43,6 +43,13 @@ locals {
           memory = "256M"
         }
       }
+      topologySpreadConstraints = [
+        {
+          maxSkew           = 1
+          topologyKey       = "topology.kubernetes.io/zone"
+          whenUnsatisfiable = "ScheduleAnyway"
+        }
+      ]
     })
   } : {}
 }
