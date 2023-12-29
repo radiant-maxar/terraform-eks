@@ -140,20 +140,41 @@ resource "helm_release" "aws_efs_csi_driver" {
 
   values = [
     yamlencode({
-      "controller" = {
-        "serviceAccount" = {
-          "annotations" = {
+      controller = {
+        # Use `podAntiAffinity` since the EFS chart doesn't support `topologySpreadConstraints`.
+        affinity = {
+          podAntiAffinity = {
+            requiredDuringSchedulingIgnoredDuringExecution = [
+              {
+                labelSelector = {
+                  matchExpressions = [
+                    {
+                      key      = "app"
+                      operator = "In"
+                      values = [
+                        "efs-csi-controller"
+                      ]
+                    }
+                  ]
+                }
+                topologyKey = "topology.kubernetes.io/zone"
+              }
+            ]
+          }
+        }
+        serviceAccount = {
+          annotations = {
             "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
           }
         }
-        "tags" = var.tags
+        tags = var.tags
       }
-      "image" = {
-        "repository" = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
+      image = {
+        repository = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
       }
-      "node" = {
-        "serviceAccount" = {
-          "annotations" = {
+      node = {
+        serviceAccount = {
+          annotations = {
             "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-efs-csi-driver-role"
           }
         }
