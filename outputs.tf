@@ -72,3 +72,13 @@ output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider if `enable_irsa = true`"
   value       = module.eks.oidc_provider_arn
 }
+
+output "s3_csi_driver_role_arn" {
+  description = "The S3 CSI Storage Driver IRSA role Amazon Resource Name (ARN)"
+  value       = var.s3_csi_driver ? eks_s3_csi_driver_irsa[0].iam_role_arn : null
+}
+
+output "s3_csi_driver_role_name" {
+  description = "The S3 CSI Storage Driver IRSA role name"
+  value       = var.s3_csi_driver ? eks_s3_csi_driver_irsa[0].iam_role_name : null
+}

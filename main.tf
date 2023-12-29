@@ -59,6 +59,15 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
         var.ebs_csi_driver_options
       )
     } : {},
+    var.s3_csi_driver ? {
+      "aws-mountpoint-s3-csi-driver" = merge(
+        local.addon_defaults,
+        {
+          service_account_role_arn = module.eks_s3_csi_irsa[0].iam_role_arn
+        },
+        var.s3_csi_driver_options
+      )
+    } : {},
     var.coredns ? {
       coredns = merge(local.addon_defaults, var.coredns_options)
     } : {},
