@@ -45,6 +45,12 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
       "aws-ebs-csi-driver" = merge(
         local.addon_defaults,
         {
+          configuration_values = jsonencode({
+            extraVolumeTags = {
+              for key, value in var.tags : key => value
+              if key != "Name"
+            }
+          })
           service_account_role_arn = module.eks_ebs_csi_irsa[0].iam_role_arn
         },
         var.ebs_csi_driver_options
