@@ -504,14 +504,14 @@ variable "s3_csi_driver" {
   default     = false
 }
 
-variable "s3_csi_driver_bucket_name" {
-  description = "The bucket name to use with the S3 CSI storage driver addon."
-  type        = string
-  default     = ""
+variable "s3_csi_driver_bucket_names" {
+  description = "The bucket names that the S3 CSI storage driver addon has permission to use."
+  type        = list(string)
+  default     = []
 }
 
 variable "s3_csi_driver_options" {
-  description = "Additional custom values for the S3 CSI storage driver addon"
+  description = "Additional custom values for the S3 CSI storage driver addon."
   type        = any
   default     = {}
 }

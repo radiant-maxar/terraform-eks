@@ -1,5 +1,5 @@
 locals {
-  s3_csi_driver_policy = var.s3_csi_driver && length(var.s3_csi_driver_bucket_name) > 0
+  s3_csi_driver_policy = var.s3_csi_driver && length(var.s3_csi_driver_bucket_names) > 0
 }
 
 module "eks_s3_csi_driver_irsa" {
@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "eks_s3_csi_driver" {
       "s3:ListBucket"
     ]
     resources = [
-      "arn:${local.aws_partition}:s3:::${var.s3_csi_driver_bucket_name}"
+      for bucket_name in var.s3_csi_driver_bucket_names : "arn:${local.aws_partition}:s3:::${bucket_name}"
     ]
   }
 
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "eks_s3_csi_driver" {
       "s3:DeleteObject"
     ]
     resources = [
-      "arn:${local.aws_partition}:s3:::${var.s3_csi_driver_bucket_name}/*"
+      for bucket_name in var.s3_csi_driver_bucket_names : "arn:${local.aws_partition}:s3:::${bucket_name}/*"
     ]
   }
 }
