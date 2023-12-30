@@ -315,6 +315,12 @@ variable "karpenter" {
   default     = false
 }
 
+variable "karpenter_iam_role_additional_policies" {
+  description = "Additional IAM policies to be attached to Karpenter's role."
+  type        = map(string)
+  default     = {}
+}
+
 variable "karpenter_namespace" {
   default     = "kube-system"
   description = "Namespace that Karpenter will use."
