@@ -40,12 +40,12 @@ output "crossplane_role_name" {
 
 output "ebs_csi_driver_role_arn" {
   description = "The EBS CSI Storage Driver IRSA role Amazon Resource Name (ARN)"
-  value       = var.ebs_csi_driver ? module.eks_ebs_csi_irsa[0].iam_role_arn : null
+  value       = var.ebs_csi_driver ? module.eks_ebs_csi_driver_irsa[0].iam_role_arn : null
 }
 
 output "ebs_csi_driver_role_name" {
   description = "The EBS CSI Storage Driver IRSA role name"
-  value       = var.ebs_csi_driver ? module.eks_ebs_csi_irsa[0].iam_role_name : null
+  value       = var.ebs_csi_driver ? module.eks_ebs_csi_driver_irsa[0].iam_role_name : null
 }
 
 output "efs_csi_driver_role_arn" {
