@@ -1,6 +1,6 @@
 variable "aws_auth_roles" {
   description = "List of additional role maps to add to the aws-auth configmap, use with caution."
-  type        = list(map)
+  type        = list(map(any))
   default     = []
 }
 
