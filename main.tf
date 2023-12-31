@@ -23,7 +23,7 @@ locals {
     [
       for role in var.system_masters_roles : {
         rolearn  = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${role}"
-        username = role
+        username = "${role}:{{SessionName}}"
         groups   = ["system:masters"]
       }
     ],
