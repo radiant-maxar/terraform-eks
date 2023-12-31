@@ -84,6 +84,9 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
       "vpc-cni" = merge(
         local.addon_defaults,
         {
+          configuration_values = jsonencode({
+            enableNetworkPolicy = "true"
+          })
           service_account_role_arn = module.eks_vpc_cni_irsa[0].iam_role_arn
         },
         var.vpc_cni_options
