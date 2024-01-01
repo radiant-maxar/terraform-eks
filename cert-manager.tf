@@ -1,6 +1,6 @@
 ## cert-manager
 locals {
-  cert_manager_policy = var.cert_manager && length(var.cert_manager_route53_zone_id) > 0
+  cert_manager_policy = var.cert_manager && length(var.cert_manager_route53_zone_ids) > 0
 }
 
 module "cert_manager_irsa" {
@@ -35,7 +35,9 @@ data "aws_iam_policy_document" "cert_manager" {
       "route53:ChangeResourceRecordSets",
       "route53:ListResourceRecordSets",
     ]
-    resources = ["arn:${local.aws_partition}:route53:::hostedzone/${var.cert_manager_route53_zone_id}"]
+    resources = [
+      for zone_id in var.cert_manager_route53_zone_ids : "arn:${local.aws_partition}:route53:::hostedzone/${zone_id}"
+    ]
   }
 }
 

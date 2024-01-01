@@ -16,10 +16,10 @@ variable "cert_manager_namespace" {
   type        = string
 }
 
-variable "cert_manager_route53_zone_id" {
-  default     = ""
-  description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
-  type        = string
+variable "cert_manager_route53_zone_ids" {
+  default     = []
+  description = "Configure cert-manager to issue certificates for these Route53 DNS Zone IDs when provided."
+  type        = list(string)
 }
 
 variable "cert_manager_values" {
