@@ -9,16 +9,6 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
   aws_partition  = data.aws_partition.current.partition
   aws_region     = data.aws_region.current.name
-  aws_auth_karpenter_roles = var.karpenter ? [
-    {
-      rolearn  = module.karpenter[0].role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    },
-  ] : []
   aws_auth_roles = concat(
     [
       for role in var.system_masters_roles : {
@@ -27,7 +17,6 @@ locals {
         groups   = ["system:masters"]
       }
     ],
-    local.aws_auth_karpenter_roles,
     var.aws_auth_roles
   )
   tags_noname = {
@@ -114,13 +103,14 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_endpoint_public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
-  aws_auth_roles            = local.aws_auth_roles
-  manage_aws_auth_configmap = true
-  enable_irsa               = true
-  subnet_ids                = concat(var.public_subnets, var.private_subnets)
-  vpc_id                    = var.vpc_id
+  # aws-auth configmap
+  aws_auth_node_iam_role_arns_non_windows = var.karpenter ? [module.karpenter[0].role_arn] : []
+  aws_auth_roles                          = local.aws_auth_roles
+  manage_aws_auth_configmap               = true
 
-  node_security_group_additional_rules = var.node_security_group_additional_rules
+  enable_irsa = true
+  subnet_ids  = concat(var.public_subnets, var.private_subnets)
+  vpc_id      = var.vpc_id
 
   eks_managed_node_group_defaults = {
     ami_type                     = var.default_ami_type
@@ -137,7 +127,8 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   fargate_profiles         = var.fargate_profiles
   fargate_profile_defaults = var.fargate_profile_defaults
 
-  node_security_group_tags = var.node_security_group_tags
+  node_security_group_tags             = var.node_security_group_tags
+  node_security_group_additional_rules = var.node_security_group_additional_rules
 
   tags = merge(
     var.tags,
