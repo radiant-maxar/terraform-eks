@@ -6,7 +6,7 @@ module "karpenter" {
   # source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   # version = "20.x.x"
   cluster_name                    = var.cluster_name
-  iam_role_additional_policies    = var.karpenter_iam_role_additional_policies
+  iam_role_additional_policies    = var.iam_role_additional_policies
   iam_role_attach_cni_policy      = var.iam_role_attach_cni_policy
   irsa_namespace_service_accounts = ["${var.karpenter_namespace}:karpenter"]
   irsa_oidc_provider_arn          = module.eks.oidc_provider_arn

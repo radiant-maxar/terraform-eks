@@ -123,13 +123,14 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   node_security_group_additional_rules = var.node_security_group_additional_rules
 
   eks_managed_node_group_defaults = {
-    ami_type                   = var.default_ami_type
-    capacity_type              = var.default_capacity_type
-    desired_size               = var.default_desired_size
-    ebs_optimized              = true
-    iam_role_attach_cni_policy = var.iam_role_attach_cni_policy
-    max_size                   = var.default_max_size
-    min_size                   = var.default_min_size
+    ami_type                     = var.default_ami_type
+    capacity_type                = var.default_capacity_type
+    desired_size                 = var.default_desired_size
+    ebs_optimized                = true
+    iam_role_additional_policies = var.iam_role_additional_policies
+    iam_role_attach_cni_policy   = var.iam_role_attach_cni_policy
+    max_size                     = var.default_max_size
+    min_size                     = var.default_min_size
   }
   eks_managed_node_groups = var.eks_managed_node_groups
 

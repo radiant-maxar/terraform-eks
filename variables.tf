@@ -309,16 +309,16 @@ variable "iam_role_attach_cni_policy" {
   type        = bool
 }
 
+variable "iam_role_additional_policies" {
+  description = "Additional policies to be attached to EKS Node groups"
+  type        = map(string)
+  default     = {}
+}
+
 variable "karpenter" {
   description = "Whether to use Karpenter with the EKS cluster."
   type        = bool
   default     = false
-}
-
-variable "karpenter_iam_role_additional_policies" {
-  description = "Additional IAM policies to be attached to Karpenter's role."
-  type        = map(string)
-  default     = {}
 }
 
 variable "karpenter_namespace" {
