@@ -56,9 +56,9 @@ variable "cluster_addons_timeouts" {
   description = "Create, update, and delete timeout configurations for the cluster addons"
   type        = map(string)
   default = {
-    create = "25m"
+    create = "10m"
     delete = "10m"
-    update = "15m"
+    update = "10m"
   }
 }
 
