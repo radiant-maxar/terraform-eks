@@ -1,7 +1,13 @@
 variable "aws_auth_roles" {
-  description = "List of role maps to add to the aws-auth configmap"
+  description = "List of additional role maps to add to the aws-auth configmap, use with caution."
   type        = list(any)
   default     = []
+}
+
+variable "cert_manager" {
+  description = "Install the cert-manager Helm chart when set."
+  type        = bool
+  default     = false
 }
 
 variable "cert_manager_namespace" {
@@ -10,16 +16,16 @@ variable "cert_manager_namespace" {
   type        = string
 }
 
+variable "cert_manager_route53_zone_ids" {
+  default     = []
+  description = "Configure cert-manager to issue certificates for these Route53 DNS Zone IDs when provided."
+  type        = list(string)
+}
+
 variable "cert_manager_values" {
   description = "Additional custom values for the cert-manager Helm chart."
   type        = any
   default     = {}
-}
-
-variable "cert_manager_wait" {
-  description = "Wait for the cert-manager Helm chart installation to complete."
-  type        = bool
-  default     = true
 }
 
 variable "cert_manager_version" {
@@ -28,10 +34,10 @@ variable "cert_manager_version" {
   type        = string
 }
 
-variable "cert_manager_route53_zone_id" {
-  default     = ""
-  description = "Configure cert-manager to issue certificates for this Route53 DNS Zone when provided"
-  type        = string
+variable "cert_manager_wait" {
+  description = "Wait for the cert-manager Helm chart installation to complete."
+  type        = bool
+  default     = true
 }
 
 variable "cluster_addons_most_recent" {
@@ -50,9 +56,9 @@ variable "cluster_addons_timeouts" {
   description = "Create, update, and delete timeout configurations for the cluster addons"
   type        = map(string)
   default = {
-    create = "25m"
+    create = "10m"
     delete = "10m"
-    update = "15m"
+    update = "10m"
   }
 }
 
@@ -103,10 +109,10 @@ variable "coredns" {
   default     = true
 }
 
-variable "coredns_fargate" {
-  description = "Indicates whether to configure CoreDNS for running in Fargate."
-  type        = bool
-  default     = false
+variable "coredns_options" {
+  description = "Custom options for the CoreDNS addon."
+  type        = any
+  default     = {}
 }
 
 variable "create_node_security_group" {
@@ -196,28 +202,10 @@ variable "ebs_csi_driver" {
   default     = true
 }
 
-variable "ebs_csi_driver_namespace" {
-  default     = "kube-system"
-  description = "Namespace that EBS CSI storage driver will use."
-  type        = string
-}
-
-variable "ebs_csi_driver_values" {
-  description = "Additional custom values for the EBS CSI Driver Helm chart."
+variable "ebs_csi_driver_options" {
+  description = "Additional custom values for the EBS CSI Driver addon."
   type        = any
   default     = {}
-}
-
-variable "ebs_csi_driver_wait" {
-  description = "Wait for the EBS CSI storage driver Helm chart install to complete."
-  type        = bool
-  default     = true
-}
-
-variable "ebs_csi_driver_version" {
-  default     = "2.26.0"
-  description = "Version of the EFS CSI storage driver to install."
-  type        = string
 }
 
 variable "ebs_storage_class_mount_options" {
@@ -291,6 +279,12 @@ variable "eks_pod_identity_agent" {
   default     = true
 }
 
+variable "eks_pod_identity_agent_options" {
+  description = "Custom options for the eks-pod-identity-agent addon."
+  type        = any
+  default     = {}
+}
+
 variable "fargate_profiles" {
   description = "Map of Fargate Profile definitions to create."
   type        = map(any)
@@ -313,6 +307,12 @@ variable "iam_role_attach_cni_policy" {
   default     = true
   description = "Whether to attach CNI policy to EKS Node groups."
   type        = bool
+}
+
+variable "iam_role_additional_policies" {
+  description = "Additional policies to be attached to EKS Node groups"
+  type        = map(string)
+  default     = {}
 }
 
 variable "karpenter" {
@@ -367,6 +367,12 @@ variable "kube_proxy" {
   description = "Indicates whether to install the kube-proxy cluster addon."
   type        = bool
   default     = true
+}
+
+variable "kube_proxy_options" {
+  description = "Custom options for the kube-proxy addon."
+  type        = any
+  default     = {}
 }
 
 variable "kubernetes_version" {
@@ -446,6 +452,12 @@ variable "nvidia_gpu_operator_namespace" {
   type        = string
 }
 
+variable "nvidia_gpu_operator_values" {
+  description = "Additional custom values for the NVIDIA GPU Operator Helm chart."
+  type        = any
+  default     = {}
+}
+
 variable "nvidia_gpu_operator_version" {
   default     = "23.9.1"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
@@ -468,10 +480,40 @@ variable "public_subnets" {
   type        = list(any)
 }
 
+variable "snapshot_controller" {
+  description = "Indicates whether to install the snapshot-controller cluster addon."
+  type        = bool
+  default     = true
+}
+
+variable "snapshot_controller_options" {
+  description = "Custom options for the snapshot-controller addon."
+  type        = any
+  default     = {}
+}
+
 variable "system_masters_roles" {
   default     = ["PowerUsers"]
   description = "Roles from the AWS account allowed system:masters to the EKS cluster."
   type        = list(string)
+}
+
+variable "s3_csi_driver" {
+  description = "Install and configure the S3 CSI storage driver addon."
+  type        = bool
+  default     = false
+}
+
+variable "s3_csi_driver_bucket_names" {
+  description = "The bucket names that the S3 CSI storage driver addon has permission to use."
+  type        = list(string)
+  default     = []
+}
+
+variable "s3_csi_driver_options" {
+  description = "Additional custom values for the S3 CSI storage driver addon."
+  type        = any
+  default     = {}
 }
 
 variable "tags" {
@@ -494,4 +536,10 @@ variable "vpc_cni" {
   description = "Indicates whether to install the vpc-cni cluster addon."
   type        = bool
   default     = true
+}
+
+variable "vpc_cni_options" {
+  description = "Custom options for the vpc-cni addon."
+  type        = any
+  default     = {}
 }

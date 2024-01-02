@@ -8,6 +8,7 @@ resource "helm_release" "nvidia_gpu_operator" {
   namespace        = var.nvidia_gpu_operator_namespace
   repository       = "https://helm.ngc.nvidia.com/nvidia"
   wait             = var.nvidia_gpu_operator_wait
+  values           = [yamlencode(var.nvidia_gpu_operator_values)]
   version          = "v${var.nvidia_gpu_operator_version}"
 
   depends_on = [

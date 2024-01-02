@@ -19,7 +19,7 @@ module "crossplane_irsa" {
 
 resource "aws_iam_role_policy_attachment" "crossplane" {
   count      = var.crossplane ? length(var.crossplane_policy_arns) : 0
-  role       = "${var.cluster_name}-crossplane-role"
+  role       = module.crossplane_irsa[0].iam_role_name
   policy_arn = var.crossplane_policy_arns[count.index]
   depends_on = [
     module.crossplane_irsa[0]
@@ -40,7 +40,7 @@ resource "helm_release" "crossplane" {
     yamlencode({
       serviceAccount = {
         annotations = {
-          "eks.amazonaws.com/role-arn" = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-crossplane-role"
+          "eks.amazonaws.com/role-arn" = module.crossplane_irsa[0].iam_role_arn
         }
       }
     }),

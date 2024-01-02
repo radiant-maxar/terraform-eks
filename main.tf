@@ -9,42 +9,20 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
   aws_partition  = data.aws_partition.current.partition
   aws_region     = data.aws_region.current.name
-  aws_auth_karpenter_roles = var.karpenter ? [
-    {
-      rolearn  = module.karpenter[0].role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    },
-  ] : []
   aws_auth_roles = concat(
     [
       for role in var.system_masters_roles : {
         rolearn  = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${role}"
-        username = role
+        username = "${role}:{{SessionName}}"
         groups   = ["system:masters"]
       }
     ],
-    local.aws_auth_karpenter_roles,
     var.aws_auth_roles
   )
-  coredns_addon_defaults = var.coredns_fargate ? {
-    configuration_values = jsonencode({
-      computeType = "Fargate"
-      resources = {
-        limits = {
-          cpu    = "0.25"
-          memory = "256M"
-        }
-        requests = {
-          cpu    = "0.25"
-          memory = "256M"
-        }
-      }
-    })
-  } : {}
+  tags_noname = {
+    for key, value in var.tags : key => value
+    if key != "Name"
+  }
 }
 
 # EKS Cluster
@@ -56,21 +34,51 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_version = var.kubernetes_version
 
   cluster_addons = merge(
+    var.ebs_csi_driver ? {
+      "aws-ebs-csi-driver" = merge(
+        local.addon_defaults,
+        {
+          configuration_values = jsonencode({
+            controller = {
+              extraVolumeTags = local.tags_noname
+            }
+          })
+          service_account_role_arn = module.eks_ebs_csi_driver_irsa[0].iam_role_arn
+        },
+        var.ebs_csi_driver_options
+      )
+    } : {},
+    var.s3_csi_driver ? {
+      "aws-mountpoint-s3-csi-driver" = merge(
+        local.addon_defaults,
+        {
+          service_account_role_arn = module.eks_s3_csi_driver_irsa[0].iam_role_arn
+        },
+        var.s3_csi_driver_options
+      )
+    } : {},
     var.coredns ? {
-      coredns = merge(local.addon_defaults, local.coredns_addon_defaults)
+      coredns = merge(local.addon_defaults, var.coredns_options)
     } : {},
     var.eks_pod_identity_agent ? {
-      "eks-pod-identity-agent" = local.addon_defaults
+      "eks-pod-identity-agent" = merge(local.addon_defaults, var.eks_pod_identity_agent_options)
     } : {},
     var.kube_proxy ? {
-      "kube-proxy" = local.addon_defaults
+      "kube-proxy" = merge(local.addon_defaults, var.kube_proxy_options)
+    } : {},
+    var.snapshot_controller ? {
+      "snapshot-controller" = merge(local.addon_defaults, var.snapshot_controller_options)
     } : {},
     var.vpc_cni ? {
       "vpc-cni" = merge(
         local.addon_defaults,
         {
+          configuration_values = jsonencode({
+            enableNetworkPolicy = "true"
+          })
           service_account_role_arn = module.eks_vpc_cni_irsa[0].iam_role_arn
-        }
+        },
+        var.vpc_cni_options
       )
     } : {},
     var.cluster_addons_overrides
@@ -95,29 +103,32 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_endpoint_public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
-  aws_auth_roles            = local.aws_auth_roles
-  manage_aws_auth_configmap = true
-  enable_irsa               = true
-  subnet_ids                = concat(var.public_subnets, var.private_subnets)
-  vpc_id                    = var.vpc_id
+  # aws-auth configmap
+  aws_auth_node_iam_role_arns_non_windows = var.karpenter ? [module.karpenter[0].role_arn] : []
+  aws_auth_roles                          = local.aws_auth_roles
+  manage_aws_auth_configmap               = true
 
-  node_security_group_additional_rules = var.node_security_group_additional_rules
+  enable_irsa = true
+  subnet_ids  = concat(var.public_subnets, var.private_subnets)
+  vpc_id      = var.vpc_id
 
   eks_managed_node_group_defaults = {
-    ami_type                   = var.default_ami_type
-    capacity_type              = var.default_capacity_type
-    desired_size               = var.default_desired_size
-    ebs_optimized              = true
-    iam_role_attach_cni_policy = var.iam_role_attach_cni_policy
-    max_size                   = var.default_max_size
-    min_size                   = var.default_min_size
+    ami_type                     = var.default_ami_type
+    capacity_type                = var.default_capacity_type
+    desired_size                 = var.default_desired_size
+    ebs_optimized                = true
+    iam_role_additional_policies = var.iam_role_additional_policies
+    iam_role_attach_cni_policy   = var.iam_role_attach_cni_policy
+    max_size                     = var.default_max_size
+    min_size                     = var.default_min_size
   }
   eks_managed_node_groups = var.eks_managed_node_groups
 
   fargate_profiles         = var.fargate_profiles
   fargate_profile_defaults = var.fargate_profile_defaults
 
-  node_security_group_tags = var.node_security_group_tags
+  node_security_group_tags             = var.node_security_group_tags
+  node_security_group_additional_rules = var.node_security_group_additional_rules
 
   tags = merge(
     var.tags,

@@ -31,17 +31,17 @@ resource "helm_release" "aws_lb_controller" {
 
   values = [
     yamlencode({
-      "clusterName" = var.cluster_name
-      "defaultTags" = var.tags
-      "region"      = local.aws_region
-      "serviceAccount" = {
-        "annotations" = {
-          "eks.amazonaws.com/role-arn"               = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${var.cluster_name}-lb-role"
+      clusterName = var.cluster_name
+      defaultTags = var.tags
+      region      = local.aws_region
+      serviceAccount = {
+        annotations = {
+          "eks.amazonaws.com/role-arn"               = module.eks_lb_irsa[0].iam_role_arn
           "eks.amazonaws.com/sts-regional-endpoints" = "true"
         }
-        "name" = "aws-load-balancer-controller"
+        name = "aws-load-balancer-controller"
       }
-      "vpcId" = var.vpc_id
+      vpcId = var.vpc_id
     }),
     yamlencode(var.lb_controller_values),
   ]
