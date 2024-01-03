@@ -48,20 +48,20 @@ data "aws_iam_policy_document" "eks_vpc_cni" {
     ]
   }
 
-  # statement {
-  #   sid = "AllowScopedCreateNetworkInterface"
-  #   actions = [
-  #     "ec2:CreateNetworkInterface"
-  #   ]
-  #   resources = [
-  #     "arn:${local.aws_partition}:ec2:${local.aws_region}:*:network-interface/*",
-  #   ]
-  #   condition {
-  #     test     = "StringEquals"
-  #     variable = "aws:RequestTag/cluster.k8s.amazonaws.com/name"
-  #     values   = [var.cluster_name]
-  #   }
-  # }
+  statement {
+    sid = "AllowScopedCreateNetworkInterface"
+    actions = [
+      "ec2:CreateNetworkInterface"
+    ]
+    resources = [
+      "arn:${local.aws_partition}:ec2:${local.aws_region}:*:network-interface/*",
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/cluster.k8s.amazonaws.com/name"
+      values   = [var.cluster_name]
+    }
+  }
 
   # statement {
   #   sid = "AllowVPCCreateNetworkInterface"
@@ -79,52 +79,52 @@ data "aws_iam_policy_document" "eks_vpc_cni" {
   #   }
   # }
 
-  # statement {
-  #   sid = "AllowScopedDeleteNetworkInterface"
-  #   actions = [
-  #     "ec2:DeleteNetworkInterface",
-  #     "ec2:UnassignPrivateIpAddresses",
-  #     "ec2:AssignPrivateIpAddresses",
-  #     "ec2:AttachNetworkInterface",
-  #     "ec2:DetachNetworkInterface",
-  #     "ec2:ModifyNetworkInterfaceAttribute"
-  #   ]
-  #   resources = [
-  #     "arn:${local.aws_partition}:ec2:${local.aws_region}:*:network-interface/*",
-  #   ]
-  #   condition {
-  #     test     = "StringEquals"
-  #     variable = "aws:ResourceTag/cluster.k8s.amazonaws.com/name"
-  #     values   = [var.cluster_name]
-  #   }
-  # }
+  statement {
+    sid = "AllowScopedDeleteNetworkInterface"
+    actions = [
+      "ec2:DeleteNetworkInterface",
+      "ec2:UnassignPrivateIpAddresses",
+      "ec2:AssignPrivateIpAddresses",
+      "ec2:AttachNetworkInterface",
+      "ec2:DetachNetworkInterface",
+      "ec2:ModifyNetworkInterfaceAttribute"
+    ]
+    resources = [
+      "arn:${local.aws_partition}:ec2:${local.aws_region}:*:network-interface/*",
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/cluster.k8s.amazonaws.com/name"
+      values   = [var.cluster_name]
+    }
+  }
 
-  # statement {
-  #   sid = "AllowScopedAttachNetworkInterface"
-  #   actions = [
-  #     "ec2:AttachNetworkInterface",
-  #     "ec2:DetachNetworkInterface",
-  #     "ec2:ModifyNetworkInterfaceAttribute"
-  #   ]
-  #   resources = [
-  #     "arn:${local.aws_partition}:ec2:${local.aws_region}:*:instance/*",
-  #   ]
-  #   condition {
-  #     test     = "StringEquals"
-  #     variable = "aws:ResourceTag/cluster.k8s.amazonaws.com/name"
-  #     values   = [var.cluster_name]
-  #   }
-  # }
+  statement {
+    sid = "AllowScopedAttachNetworkInterface"
+    actions = [
+      "ec2:AttachNetworkInterface",
+      "ec2:DetachNetworkInterface",
+      "ec2:ModifyNetworkInterfaceAttribute"
+    ]
+    resources = [
+      "arn:${local.aws_partition}:ec2:${local.aws_region}:*:instance/*",
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/cluster.k8s.amazonaws.com/name"
+      values   = [var.cluster_name]
+    }
+  }
 
-  # statement {
-  #   sid = "AllowModifyNetworkInterfaceAttribute"
-  #   actions = [
-  #     "ec2:ModifyNetworkInterfaceAttribute"
-  #   ]
-  #   resources = [
-  #     "arn:${local.aws_partition}:ec2:${local.aws_region}:*:security-group/*",
-  #   ]
-  # }
+  statement {
+    sid = "AllowModifyNetworkInterfaceAttribute"
+    actions = [
+      "ec2:ModifyNetworkInterfaceAttribute"
+    ]
+    resources = [
+      "arn:${local.aws_partition}:ec2:${local.aws_region}:*:security-group/*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "eks_vpc_cni" {
