@@ -93,7 +93,7 @@ variable "cluster_name" {
 
 variable "cluster_security_group_additional_rules" {
   description = "Additional security group rules to add to the cluster security group created."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -269,7 +269,7 @@ variable "efs_storage_class_parameters" {
 
 variable "eks_managed_node_groups" {
   description = "Map of managed node groups for the EKS cluster."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
@@ -287,7 +287,7 @@ variable "eks_pod_identity_agent_options" {
 
 variable "fargate_profiles" {
   description = "Map of Fargate Profile definitions to create."
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
