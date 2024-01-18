@@ -38,10 +38,8 @@ resource "helm_release" "crossplane" {
 
   values = [
     yamlencode({
-      serviceAccount = {
-        customAnnotations = {
-          "eks.amazonaws.com/role-arn" = module.crossplane_irsa[0].iam_role_arn
-        }
+      provider = {
+        packages = var.crossplane_provider_packages
       }
     }),
     yamlencode(var.crossplane_values),
