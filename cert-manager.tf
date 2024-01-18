@@ -6,7 +6,7 @@ locals {
 module "cert_manager_irsa" {
   count   = var.cert_manager ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.33.0"
+  version = "~> 5.33.1"
 
   role_name = "${var.cluster_name}-cert-manager-role"
 
