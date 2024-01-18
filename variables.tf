@@ -141,12 +141,13 @@ variable "crossplane_policy_arns" {
 
 variable "crossplane_provider_packages" {
   default = [
-    "xpkg.upbound.io/crossplane-contrib/provider-aws:v0.41.0",
-    "xpkg.upbound.io/crossplane-contrib/provider-helm:v0.16.0",
-    "xpkg.upbound.io/crossplane-contrib/provider-kubernetes:v0.11.0",
+    {
+      name    = "aws"
+      version = "0.41.0"
+    },
   ]
-  description = "Crossplane Provider packages to install by default."
-  type        = list(string)
+  description = "List of maps of the Crossplane Provider packages to install."
+  type        = list(any)
 }
 
 variable "crossplane_values" {

@@ -39,7 +39,9 @@ resource "helm_release" "crossplane" {
   values = [
     yamlencode({
       provider = {
-        packages = var.crossplane_provider_packages
+        packages = [
+          for pkg in var.crossplane_provider_packages : try(pkg.package, "xpkg.upbound.io/crossplane-contrib/provider-${pkg.name}:v${pkg.version}")
+        ]
       }
     }),
     yamlencode(var.crossplane_values),
