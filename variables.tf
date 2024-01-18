@@ -139,15 +139,10 @@ variable "crossplane_policy_arns" {
   type        = list(string)
 }
 
-variable "crossplane_provider_packages" {
-  default = [
-    {
-      name    = "aws"
-      version = "0.41.0"
-    },
-  ]
-  description = "List of maps of the Crossplane Provider packages to install."
-  type        = list(any)
+variable "crossplane_service_account_name" {
+  default     = "provider-aws-*"
+  description = "Crossplane service account name for IRSA binding."
+  type        = string
 }
 
 variable "crossplane_values" {

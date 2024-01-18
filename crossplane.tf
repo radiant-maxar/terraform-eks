@@ -10,7 +10,7 @@ module "crossplane_irsa" {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "${var.crossplane_namespace}:crossplane-system:provider-aws*",
+        "${var.crossplane_namespace}:${var.crossplane_service_account_name}",
       ]
     }
   }
@@ -37,13 +37,6 @@ resource "helm_release" "crossplane" {
   wait             = var.crossplane_wait
 
   values = [
-    yamlencode({
-      provider = {
-        packages = [
-          for pkg in var.crossplane_provider_packages : try(pkg.package, "xpkg.upbound.io/crossplane-contrib/provider-${pkg.name}:v${pkg.version}")
-        ]
-      }
-    }),
     yamlencode(var.crossplane_values),
   ]
 
