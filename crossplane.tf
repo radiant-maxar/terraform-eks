@@ -10,7 +10,7 @@ module "crossplane_irsa" {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "${var.crossplane_namespace}:crossplane-system:provider-aws-*",
+        "${var.crossplane_namespace}:crossplane-system:provider-aws*",
       ]
     }
   }
