@@ -30,12 +30,12 @@ output "cluster_primary_security_group_id" {
 
 output "crossplane_role_arn" {
   description = "The Crossplane IRSA role Amazon Resource Name (ARN)"
-  value       = var.crossplane ? module.crossplane_irsa[0].iam_role_arn : null
+  value       = var.crossplane && var.crossplane_irsa ? module.crossplane_irsa[0].iam_role_arn : null
 }
 
 output "crossplane_role_name" {
   description = "The Crossplane IRSA role name"
-  value       = var.crossplane ? module.crossplane_irsa[0].iam_role_name : null
+  value       = var.crossplane && var.crossplane_irsa ? module.crossplane_irsa[0].iam_role_name : null
 }
 
 output "ebs_csi_driver_role_arn" {
