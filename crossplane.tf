@@ -6,6 +6,7 @@ module "crossplane_irsa" {
 
   role_name = "${var.cluster_name}-crossplane-role"
 
+  assume_role_condition_test = "StringLike"
   oidc_providers = {
     main = {
       provider_arn = module.eks.oidc_provider_arn
