@@ -1,6 +1,6 @@
 ## Crossplane
 module "crossplane_irsa" {
-  count   = var.crossplane ? 1 : 0
+  count   = var.crossplane && var.crossplane_irsa ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.33.1"
 
@@ -18,7 +18,7 @@ module "crossplane_irsa" {
 }
 
 resource "aws_iam_role_policy_attachment" "crossplane" {
-  count      = var.crossplane ? length(var.crossplane_policy_arns) : 0
+  count      = var.crossplane && var.crossplane_irsa ? length(var.crossplane_policy_arns) : 0
   role       = module.crossplane_irsa[0].iam_role_name
   policy_arn = var.crossplane_policy_arns[count.index]
   depends_on = [
@@ -41,7 +41,6 @@ resource "helm_release" "crossplane" {
   ]
 
   depends_on = [
-    module.crossplane_irsa[0],
     module.eks,
   ]
 }

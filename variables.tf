@@ -127,6 +127,12 @@ variable "crossplane" {
   default     = false
 }
 
+variable "crossplane_irsa" {
+  description = "Indicates whether to create an IRSA role for Crossplane."
+  type        = bool
+  default     = true
+}
+
 variable "crossplane_namespace" {
   default     = "crossplane-system"
   description = "Namespace that Crossplane will use."
