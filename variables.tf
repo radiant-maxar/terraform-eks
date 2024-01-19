@@ -140,7 +140,7 @@ variable "crossplane_policy_arns" {
 }
 
 variable "crossplane_service_account_name" {
-  default     = "provider-aws-*"
+  default     = "provider-aws"
   description = "Crossplane service account name for IRSA binding."
   type        = string
 }
