@@ -1,16 +1,17 @@
 ## Crossplane
 module "crossplane_irsa" {
-  count   = var.crossplane ? 1 : 0
+  count   = var.crossplane && var.crossplane_irsa ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.33.0"
+  version = "~> 5.33.1"
 
   role_name = "${var.cluster_name}-crossplane-role"
 
+  assume_role_condition_test = "StringLike"
   oidc_providers = {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "${var.crossplane_namespace}:crossplane-system:provider-aws-*",
+        "${var.crossplane_namespace}:${var.crossplane_service_account_name}",
       ]
     }
   }
@@ -18,7 +19,7 @@ module "crossplane_irsa" {
 }
 
 resource "aws_iam_role_policy_attachment" "crossplane" {
-  count      = var.crossplane ? length(var.crossplane_policy_arns) : 0
+  count      = var.crossplane && var.crossplane_irsa ? length(var.crossplane_policy_arns) : 0
   role       = module.crossplane_irsa[0].iam_role_name
   policy_arn = var.crossplane_policy_arns[count.index]
   depends_on = [
@@ -37,18 +38,10 @@ resource "helm_release" "crossplane" {
   wait             = var.crossplane_wait
 
   values = [
-    yamlencode({
-      serviceAccount = {
-        annotations = {
-          "eks.amazonaws.com/role-arn" = module.crossplane_irsa[0].iam_role_arn
-        }
-      }
-    }),
     yamlencode(var.crossplane_values),
   ]
 
   depends_on = [
-    module.crossplane_irsa[0],
     module.eks,
   ]
 }

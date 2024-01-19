@@ -127,6 +127,12 @@ variable "crossplane" {
   default     = false
 }
 
+variable "crossplane_irsa" {
+  description = "Indicates whether to create an IRSA role for Crossplane."
+  type        = bool
+  default     = true
+}
+
 variable "crossplane_namespace" {
   default     = "crossplane-system"
   description = "Namespace that Crossplane will use."
@@ -137,6 +143,12 @@ variable "crossplane_policy_arns" {
   default     = []
   description = "Configure and install Crossplane with the given AWS IAM Policy ARNs."
   type        = list(string)
+}
+
+variable "crossplane_service_account_name" {
+  default     = "provider-aws-*"
+  description = "Crossplane service account name for IRSA binding."
+  type        = string
 }
 
 variable "crossplane_values" {
