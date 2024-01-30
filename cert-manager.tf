@@ -60,7 +60,7 @@ locals {
   cert_manager_best_practice_values = merge(local.cert_manager_best_practice_defaults, {
     cainjector = merge(local.cert_manager_best_practice_defaults, {
       # This best practice is disabled because other common components,
-      # like Cluster API's resource manager, depend on the cainjector
+      # like Cluster API's controller manager, depend on the cainjector
       # being available to all namespaces.  See:
       # https://cert-manager.io/docs/installation/best-practice/#memory
       # extraArgs = [
@@ -70,6 +70,10 @@ locals {
       podDisruptionBudget = local.cert_manager_pdb
       replicaCount        = 2
     })
+    # https://cert-manager.io/docs/installation/best-practice/#controller
+    livenessProbe = {
+      enabled = true
+    }
     podDisruptionBudget = local.cert_manager_pdb
     replicaCount        = 2
     startupapicheck     = local.cert_manager_best_practice_defaults
