@@ -10,6 +10,18 @@ variable "cert_manager" {
   default     = false
 }
 
+variable "cert_manager_best_practice" {
+  description = "Configure cert-manager Helm chart with best practice values."
+  type        = bool
+  default     = false
+}
+
+variable "cert_manager_best_practice_defaults" {
+  description = "Additional custom values to merge with best practice values."
+  type        = any
+  default     = {}
+}
+
 variable "cert_manager_namespace" {
   default     = "cert-manager"
   description = "Namespace that cert-manager will use."
