@@ -1,6 +1,92 @@
 ## cert-manager
 locals {
   cert_manager_policy = var.cert_manager && length(var.cert_manager_route53_zone_ids) > 0
+  # The best practices values and defaults are sourced from:
+  # https://cert-manager.io/docs/installation/best-practice/
+  cert_manager_best_practice_defaults = merge(var.cert_manager_best_practice_defaults, {
+    automountServiceAccountToken = false
+    serviceAccount = {
+      automountServiceAccountToken = false
+    }
+    # https://cert-manager.io/docs/installation/best-practice/#restrict-auto-mount-of-service-account-tokens
+    volumes = [
+      {
+        name = "serviceaccount-token"
+        projected = {
+          defaultMode = 292 # int(0o444)
+          sources = [
+            {
+              serviceAccountToken = {
+                expirationSeconds = 3607
+                path              = "token"
+              }
+            },
+            {
+              configMap = {
+                name = "kube-root-ca.crt"
+                items = [
+                  {
+                    key  = "ca.crt"
+                    path = "ca.crt"
+                  },
+                ]
+              }
+            },
+            {
+              downwardAPI = {
+                items = [
+                  {
+                    path = "namespace"
+                    fieldRef = {
+                      apiVersion = "v1"
+                      fieldPath  = "metadata.namespace"
+                    }
+                  }
+                ]
+              }
+            },
+          ]
+        }
+      }
+    ]
+    volumeMounts = [
+      {
+        mountPath = "/var/run/secrets/kubernetes.io/serviceaccount"
+        name      = "serviceaccount-token"
+        readOnly  = true
+      },
+    ]
+  })
+  cert_manager_best_practice_values = merge(local.cert_manager_best_practice_defaults, {
+    cainjector = merge(local.cert_manager_best_practice_defaults, {
+      # This best practice is disabled because other common components,
+      # like Cluster API's controller manager, depend on the cainjector
+      # being available to all namespaces.  See:
+      # https://cert-manager.io/docs/installation/best-practice/#memory
+      # extraArgs = [
+      #   "--namespace=${var.cert_manager_namespace}",
+      #   "--enable-certificates-data-source=false",
+      # ]
+      podDisruptionBudget = local.cert_manager_pdb
+      replicaCount        = 2
+    })
+    # https://cert-manager.io/docs/installation/best-practice/#controller
+    livenessProbe = {
+      enabled = true
+    }
+    podDisruptionBudget = local.cert_manager_pdb
+    replicaCount        = 2
+    startupapicheck     = local.cert_manager_best_practice_defaults
+    webhook = merge(local.cert_manager_best_practice_defaults, {
+      replicaCount        = 3
+      podDisruptionBudget = local.cert_manager_pdb
+    })
+  })
+  # https://cert-manager.io/docs/installation/best-practice/#poddisruptionbudget
+  cert_manager_pdb = {
+    enabled      = true
+    minAvailable = 1
+  }
 }
 
 module "cert_manager_irsa" {
@@ -74,20 +160,23 @@ resource "helm_release" "cert_manager" {
   # correct annotations, and that the pod's security context has permissions
   # to read the account token:
   # https://cert-manager.io/docs/configuration/acme/dns01/route53/#service-annotation
-  values = [
-    yamlencode({
-      installCRDs = true
-      securityContext = {
-        fsGroup = 1001
-      }
-      serviceAccount = {
-        annotations = {
-          "eks.amazonaws.com/role-arn" = module.cert_manager_irsa[0].iam_role_arn
+  values = concat(
+    [
+      yamlencode({
+        installCRDs = true
+        securityContext = {
+          fsGroup = 1001
         }
-      }
-    }),
-    yamlencode(var.cert_manager_values),
-  ]
+        serviceAccount = {
+          annotations = {
+            "eks.amazonaws.com/role-arn" = module.cert_manager_irsa[0].iam_role_arn
+          }
+        }
+      }),
+      yamlencode(var.cert_manager_values),
+    ],
+    var.cert_manager_best_practice ? [yamlencode(local.cert_manager_best_practice_values)] : [],
+  )
 
   depends_on = [
     module.cert_manager_irsa[0],
