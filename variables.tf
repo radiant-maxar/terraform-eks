@@ -357,16 +357,16 @@ variable "karpenter_values" {
   default     = {}
 }
 
+variable "karpenter_version" {
+  description = "Version of Karpenter Helm chart to install on the EKS cluster."
+  type        = string
+  default     = "0.33.2"
+}
+
 variable "karpenter_wait" {
   description = "Wait for the Karpenter Helm chart installation to complete."
   type        = bool
   default     = true
-}
-
-variable "karpenter_version" {
-  description = "Version of Karpenter Helm chart to install on the EKS cluster."
-  type        = string
-  default     = "0.33.1"
 }
 
 variable "kms_manage" {
