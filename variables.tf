@@ -41,7 +41,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.13.3"
+  default     = "1.14.0"
   description = "Version of cert-manager to install."
   type        = string
 }
