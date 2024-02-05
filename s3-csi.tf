@@ -6,7 +6,7 @@ module "eks_s3_csi_driver_irsa" {
   count = var.s3_csi_driver ? 1 : 0
 
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.33.1"
+  version = "~> 5.34.0"
 
   role_name = "${var.cluster_name}-s3-csi-driver-role"
 

@@ -41,7 +41,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.13.3"
+  default     = "1.14.0"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -357,16 +357,16 @@ variable "karpenter_values" {
   default     = {}
 }
 
+variable "karpenter_version" {
+  description = "Version of Karpenter Helm chart to install on the EKS cluster."
+  type        = string
+  default     = "0.33.2"
+}
+
 variable "karpenter_wait" {
   description = "Wait for the Karpenter Helm chart installation to complete."
   type        = bool
   default     = true
-}
-
-variable "karpenter_version" {
-  description = "Version of Karpenter Helm chart to install on the EKS cluster."
-  type        = string
-  default     = "0.33.1"
 }
 
 variable "kms_manage" {
@@ -400,7 +400,7 @@ variable "kube_proxy_options" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.28"
+  default     = "1.29"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
@@ -424,7 +424,7 @@ variable "lb_controller_values" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.6.2"
+  default     = "1.7.0"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
