@@ -41,7 +41,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.14.0"
+  default     = "1.14.3"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -176,7 +176,7 @@ variable "crossplane_wait" {
 }
 
 variable "crossplane_version" {
-  default     = "1.14.5"
+  default     = "1.15.0"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
@@ -263,7 +263,7 @@ variable "efs_csi_driver_values" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.5.4"
+  default     = "2.5.5"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -360,7 +360,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "0.33.2"
+  default     = "0.34.1"
 }
 
 variable "karpenter_wait" {
@@ -424,7 +424,7 @@ variable "lb_controller_values" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.7.0"
+  default     = "1.7.1"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
