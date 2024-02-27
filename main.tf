@@ -104,7 +104,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
 
   # aws-auth configmap
-  aws_auth_node_iam_role_arns_non_windows = var.karpenter ? [module.karpenter[0].iam_role_arn] : []
+  aws_auth_node_iam_role_arns_non_windows = var.karpenter ? [module.karpenter[0].node_iam_role_arn] : []
   aws_auth_roles                          = local.aws_auth_roles
   manage_aws_auth_configmap               = true
 
