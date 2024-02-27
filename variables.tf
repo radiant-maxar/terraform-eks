@@ -176,7 +176,7 @@ variable "crossplane_wait" {
 }
 
 variable "crossplane_version" {
-  default     = "1.14.5"
+  default     = "1.15.0"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
