@@ -375,6 +375,18 @@ variable "kms_manage" {
   type        = bool
 }
 
+variable "kms_key_administrators" {
+  description = "A list of IAM ARNs for [key administrators](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators). If no value is provided, the current caller identity is used to ensure at least one key admin is available"
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_key_aliases" {
+  description = "A list of aliases to create. Note - due to the use of `toset()`, values must be static strings and not computed values"
+  type        = list(string)
+  default     = []
+}
+
 variable "kms_key_deletion_window_in_days" {
   description = "The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key. If you specify a value, it must be between `7` and `30`, inclusive."
   type        = number
@@ -385,6 +397,42 @@ variable "kms_key_enable_default_policy" {
   description = "Specifies whether to enable the default key policy. Defaults to `true` to workaround EFS permissions."
   type        = bool
   default     = true
+}
+
+variable "kms_key_enable_rotation" {
+  description = "Specifies whether key rotation is enabled"
+  type        = bool
+  default     = true
+}
+
+variable "kms_key_owners" {
+  description = "A list of IAM ARNs for those who will have full key permissions (`kms:*`)"
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_key_override_policy_documents" {
+  description = "List of IAM policy documents that are merged together into the exported document. In merging, statements with non-blank `sid`s will override statements with the same `sid`"
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_key_service_users" {
+  description = "A list of IAM ARNs for [key service users](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-service-integration)"
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_key_source_policy_documents" {
+  description = "List of IAM policy documents that are merged together into the exported document. Statements must have unique `sid`s"
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_key_users" {
+  description = "A list of IAM ARNs for [key users](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-users)"
+  type        = list(string)
+  default     = []
 }
 
 variable "kube_proxy" {
