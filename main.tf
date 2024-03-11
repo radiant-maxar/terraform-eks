@@ -90,13 +90,21 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   create_cluster_security_group = var.karpenter ? false : var.create_cluster_security_group
   create_node_security_group    = var.karpenter ? false : var.create_node_security_group
 
+  # KMS key settings
   cluster_encryption_config = var.kms_manage ? {
     provider_key_arn = aws_kms_key.this[0].arn
     resources        = ["secrets"]
   } : { resources = ["secrets"] }
-  create_kms_key                  = var.kms_manage ? false : true
-  kms_key_deletion_window_in_days = var.kms_key_deletion_window_in_days
-  kms_key_enable_default_policy   = var.kms_key_enable_default_policy
+  create_kms_key                    = var.kms_manage ? false : true
+  enable_kms_key_rotation           = var.kms_key_enable_rotation
+  kms_key_administrators            = var.kms_key_administrators
+  kms_key_deletion_window_in_days   = var.kms_key_deletion_window_in_days
+  kms_key_enable_default_policy     = var.kms_key_enable_default_policy
+  kms_key_owners                    = var.kms_key_owners
+  kms_key_service_users             = var.kms_key_service_users
+  kms_key_users                     = var.kms_key_users
+  kms_key_source_policy_documents   = var.kms_key_source_policy_documents
+  kms_key_override_policy_documents = var.kms_key_override_policy_documents
 
   cluster_endpoint_private_access         = var.cluster_endpoint_private_access
   cluster_endpoint_public_access          = var.cluster_endpoint_public_access
