@@ -20,7 +20,7 @@ resource "helm_release" "karpenter_crd" {
   namespace        = var.karpenter_namespace
   repository       = "oci://public.ecr.aws/karpenter"
   chart            = "karpenter-crd"
-  version          = "v${var.karpenter_version}"
+  version          = var.karpenter_version
 
   depends_on = [
     module.eks,
@@ -34,7 +34,7 @@ resource "helm_release" "karpenter" {
   namespace  = var.karpenter_namespace
   repository = "oci://public.ecr.aws/karpenter"
   chart      = "karpenter"
-  version    = "v${var.karpenter_version}"
+  version    = var.karpenter_version
   wait       = var.karpenter_wait
 
   values = [
