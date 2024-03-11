@@ -531,7 +531,7 @@ variable "nvidia_gpu_operator_values" {
 }
 
 variable "nvidia_gpu_operator_version" {
-  default     = "23.9.1"
+  default     = "23.9.2"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
 }
