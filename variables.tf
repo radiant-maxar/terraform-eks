@@ -1,7 +1,13 @@
-variable "aws_auth_roles" {
-  description = "List of additional role maps to add to the aws-auth configmap, use with caution."
-  type        = list(any)
-  default     = []
+variable "access_entries" {
+  description = "Map of access entries to add to the cluster"
+  type        = any
+  default     = {}
+}
+
+variable "authentication_mode" {
+  description = "The authentication mode for the cluster. Valid values are `CONFIG_MAP`, `API` or `API_AND_CONFIG_MAP`"
+  type        = string
+  default     = "API"
 }
 
 variable "cert_manager" {
@@ -307,6 +313,12 @@ variable "eks_pod_identity_agent_options" {
   description = "Custom options for the eks-pod-identity-agent addon."
   type        = any
   default     = {}
+}
+
+variable "enable_cluster_creator_admin_permissions" {
+  description = "Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry"
+  type        = bool
+  default     = false
 }
 
 variable "fargate_profiles" {

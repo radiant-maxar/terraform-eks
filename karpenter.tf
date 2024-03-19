@@ -1,7 +1,7 @@
 module "karpenter" {
   count   = var.karpenter ? 1 : 0
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "20.4.0"
+  version = "~> 20.8.3"
 
   cluster_name                      = var.cluster_name
   create_access_entry               = false # re-evaluate when upgrading from v19.21.0
