@@ -145,6 +145,12 @@ variable "crossplane" {
   default     = false
 }
 
+variable "crossplane_helm" {
+  description = "Install Crossplane using Helm when set."
+  type        = bool
+  default     = true
+}
+
 variable "crossplane_irsa" {
   description = "Indicates whether to create an IRSA role for Crossplane."
   type        = bool
@@ -155,6 +161,12 @@ variable "crossplane_namespace" {
   default     = "crossplane-system"
   description = "Namespace that Crossplane will use."
   type        = string
+}
+
+variable "crossplane_options" {
+  description = "Options for the Crossplane Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "crossplane_policy_arns" {
@@ -357,10 +369,22 @@ variable "karpenter" {
   default     = false
 }
 
+variable "karpenter_helm" {
+  description = "Install Karpenter using Helm when set."
+  type        = bool
+  default     = true
+}
+
 variable "karpenter_namespace" {
   default     = "kube-system"
   description = "Namespace that Karpenter will use."
   type        = string
+}
+
+variable "karpenter_options" {
+  description = "Options for the Karpenter Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "karpenter_values" {
