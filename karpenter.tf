@@ -4,7 +4,6 @@ module "karpenter" {
   version = "~> 20.8.3"
 
   cluster_name                      = var.cluster_name
-  create_access_entry               = false # re-evaluate when upgrading from v19.21.0
   enable_irsa                       = true
   irsa_namespace_service_accounts   = ["${var.karpenter_namespace}:karpenter"]
   irsa_oidc_provider_arn            = module.eks.oidc_provider_arn
