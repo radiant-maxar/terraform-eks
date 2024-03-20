@@ -145,38 +145,62 @@ resource "aws_iam_role_policy_attachment" "cert_manager" {
 }
 
 resource "helm_release" "cert_manager" {
-  count            = var.cert_manager ? 1 : 0
-  name             = "cert-manager"
-  namespace        = var.cert_manager_namespace
+  count            = var.cert_manager && var.cert_manager_helm ? 1 : 0
+  chart            = try(var.cert_manager_options.chart, "cert-manager")
   create_namespace = var.cert_manager_namespace == "kube-system" ? false : true
-  chart            = "cert-manager"
-  repository       = "https://charts.jetstack.io"
+  keyring          = try(var.cert_manager_options.keyring, "${path.module}/cert-manager-keyring.gpg")
+  max_history      = try(var.cert_manager_options.max_history, 10)
+  name             = try(var.cert_manager_options.name, "cert-manager")
+  namespace        = var.cert_manager_namespace
+  repository       = try(var.cert_manager_options.repository, "https://charts.jetstack.io")
   version          = "v${var.cert_manager_version}"
   wait             = var.cert_manager_wait
-  keyring          = "${path.module}/cert-manager-keyring.gpg"
   verify           = var.helm_verify
+
+  values = concat(
+    [yamlencode(var.cert_manager_values)],
+    var.cert_manager_best_practice ? [yamlencode(local.cert_manager_best_practice_values)] : [],
+  )
+
+  atomic                     = try(var.cert_manager_options.atomic, null)
+  cleanup_on_fail            = try(var.cert_manager_options.cleanup_on_fail, null)
+  dependency_update          = try(var.cert_manager_options.dependency_update, null)
+  devel                      = try(var.cert_manager_options.devel, null)
+  disable_openapi_validation = try(var.cert_manager_options.disable_openapi_validation, null)
+  disable_webhooks           = try(var.cert_manager_options.disable_webhooks, null)
+  force_update               = try(var.cert_manager_options.force_update, null)
+  lint                       = try(var.cert_manager_options.lint, null)
+  recreate_pods              = try(var.cert_manager_options.recreate_pods, null)
+  render_subchart_notes      = try(var.cert_manager_options.render_subchart_notes, null)
+  replace                    = try(var.cert_manager_options.replace, null)
+  repository_key_file        = try(var.cert_manager_options.repository_key_file, null)
+  repository_cert_file       = try(var.cert_manager_options.repository_cert_file, null)
+  repository_ca_file         = try(var.cert_manager_options.repository_ca_file, null)
+  repository_username        = try(var.cert_manager_options.repository_username, null)
+  repository_password        = try(var.cert_manager_options.repository_password, null)
+  reset_values               = try(var.cert_manager_options.reset_values, null)
+  reuse_values               = try(var.cert_manager_options.reuse_values, null)
+  skip_crds                  = try(var.cert_manager_options.skip_crds, null)
+  wait_for_jobs              = try(var.cert_manager_options.wait_for_jobs, null)
 
   # Set up values so CRDs are installed with the chart, the service account has
   # correct annotations, and that the pod's security context has permissions
   # to read the account token:
   # https://cert-manager.io/docs/configuration/acme/dns01/route53/#service-annotation
-  values = concat(
-    [
-      yamlencode({
-        installCRDs = true
-        securityContext = {
-          fsGroup = 1001
-        }
-        serviceAccount = {
-          annotations = {
-            "eks.amazonaws.com/role-arn" = module.cert_manager_irsa[0].iam_role_arn
-          }
-        }
-      }),
-      yamlencode(var.cert_manager_values),
-    ],
-    var.cert_manager_best_practice ? [yamlencode(local.cert_manager_best_practice_values)] : [],
-  )
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+  set {
+    name  = "securityContext.fsGroup"
+    value = "1001"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.cert_manager_irsa[0].iam_role_arn
+  }
 
   depends_on = [
     module.cert_manager_irsa[0],

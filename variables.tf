@@ -11,7 +11,7 @@ variable "authentication_mode" {
 }
 
 variable "cert_manager" {
-  description = "Install the cert-manager Helm chart when set."
+  description = "Install cert-manager and configure IRSA for its use."
   type        = bool
   default     = false
 }
@@ -28,10 +28,22 @@ variable "cert_manager_best_practice_defaults" {
   default     = {}
 }
 
+variable "cert_manager_helm" {
+  description = "Use Helm to install cert-manager when set."
+  type        = bool
+  default     = true
+}
+
 variable "cert_manager_namespace" {
   default     = "cert-manager"
   description = "Namespace that cert-manager will use."
   type        = string
+}
+
+variable "cert_manager_options" {
+  description = "Options for the cert-manager Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "cert_manager_route53_zone_ids" {
@@ -268,10 +280,22 @@ variable "efs_csi_driver" {
   default     = true
 }
 
+variable "efs_csi_driver_helm" {
+  description = "Install EFS CSI storage driver using Helm when set."
+  type        = bool
+  default     = true
+}
+
 variable "efs_csi_driver_namespace" {
   default     = "kube-system"
   description = "Namespace that EFS CSI storage driver will use."
   type        = string
+}
+
+variable "efs_csi_driver_options" {
+  description = "Options for EFS CSI Driver Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "efs_csi_driver_values" {
@@ -490,7 +514,13 @@ variable "kubernetes_version" {
 }
 
 variable "lb_controller" {
-  description = "Install and configure the AWS Load Balancer Controller."
+  description = "Install and configure IRSA for the AWS Load Balancer Controller."
+  type        = bool
+  default     = true
+}
+
+variable "lb_controller_helm" {
+  description = "Use Helm to install the AWS Load Balancer Controller."
   type        = bool
   default     = true
 }
@@ -499,6 +529,12 @@ variable "lb_controller_namespace" {
   default     = "kube-system"
   description = "Namespace that AWS Load Balancer Controller will use."
   type        = string
+}
+
+variable "lb_controller_options" {
+  description = "Options for the AWS Load Balancer Controller Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "lb_controller_values" {
@@ -558,6 +594,12 @@ variable "nvidia_gpu_operator_namespace" {
   default     = "gpu-operator"
   description = "Namespace that NVIDIA GPU Operator will use."
   type        = string
+}
+
+variable "nvidia_gpu_operator_options" {
+  description = "Options for NVIDIA GPU Operator Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "nvidia_gpu_operator_values" {
