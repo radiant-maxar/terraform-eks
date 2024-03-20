@@ -31,26 +31,26 @@ resource "helm_release" "aws_lb_controller" {
   version          = var.lb_controller_version
   wait             = var.lb_controller_wait
 
-  # atomic                     = try(var.lb_controller_options.atomic, null)
-  # cleanup_on_fail            = try(var.lb_controller_options.cleanup_on_fail, null)
-  # dependency_update          = try(var.lb_controller_options.dependency_update, null)
-  # devel                      = try(var.lb_controller_options.devel, null)
-  # disable_openapi_validation = try(var.lb_controller_options.disable_openapi_validation, null)
-  # disable_webhooks           = try(var.lb_controller_options.disable_webhooks, null)
-  # force_update               = try(var.lb_controller_options.force_update, null)
-  # lint                       = try(var.lb_controller_options.lint, null)
-  # recreate_pods              = try(var.lb_controller_options.recreate_pods, null)
-  # render_subchart_notes      = try(var.lb_controller_options.render_subchart_notes, null)
-  # replace                    = try(var.lb_controller_options.replace, null)
-  # repository_key_file        = try(var.lb_controller_options.repository_key_file, null)
-  # repository_cert_file       = try(var.lb_controller_options.repository_cert_file, null)
-  # repository_ca_file         = try(var.lb_controller_options.repository_ca_file, null)
-  # repository_username        = try(var.lb_controller_options.repository_username, null)
-  # repository_password        = try(var.lb_controller_options.repository_password, null)
-  # reset_values               = try(var.lb_controller_options.reset_values, null)
-  # reuse_values               = try(var.lb_controller_options.reuse_values, null)
-  # skip_crds                  = try(var.lb_controller_options.skip_crds, null)
-  # wait_for_jobs              = try(var.lb_controller_options.wait_for_jobs, null)
+  atomic                     = try(var.lb_controller_options.atomic, null)
+  cleanup_on_fail            = try(var.lb_controller_options.cleanup_on_fail, null)
+  dependency_update          = try(var.lb_controller_options.dependency_update, null)
+  devel                      = try(var.lb_controller_options.devel, null)
+  disable_openapi_validation = try(var.lb_controller_options.disable_openapi_validation, null)
+  disable_webhooks           = try(var.lb_controller_options.disable_webhooks, null)
+  force_update               = try(var.lb_controller_options.force_update, null)
+  lint                       = try(var.lb_controller_options.lint, null)
+  recreate_pods              = try(var.lb_controller_options.recreate_pods, null)
+  render_subchart_notes      = try(var.lb_controller_options.render_subchart_notes, null)
+  replace                    = try(var.lb_controller_options.replace, null)
+  repository_key_file        = try(var.lb_controller_options.repository_key_file, null)
+  repository_cert_file       = try(var.lb_controller_options.repository_cert_file, null)
+  repository_ca_file         = try(var.lb_controller_options.repository_ca_file, null)
+  repository_username        = try(var.lb_controller_options.repository_username, null)
+  repository_password        = try(var.lb_controller_options.repository_password, null)
+  reset_values               = try(var.lb_controller_options.reset_values, null)
+  reuse_values               = try(var.lb_controller_options.reuse_values, null)
+  skip_crds                  = try(var.lb_controller_options.skip_crds, null)
+  wait_for_jobs              = try(var.lb_controller_options.wait_for_jobs, null)
 
   set {
     name  = "clusterName"
@@ -68,11 +68,6 @@ resource "helm_release" "aws_lb_controller" {
   }
 
   set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/sts-regional-endpoints"
-    value = "true"
-  }
-
-  set {
     name  = "serviceAccount.name"
     value = "aws-load-balancer-controller"
   }
@@ -85,6 +80,12 @@ resource "helm_release" "aws_lb_controller" {
   # Values: tags need to be encoded as values unless we get fancy.
   values = [
     yamlencode({
+      serviceAccount = {
+        annotations = {
+          # XXX: This annotation can't be done via `set`.
+          "eks.amazonaws.com/sts-regional-endpoints" = "true"
+        }
+      }
       defaultTags = var.tags
     }),
     yamlencode(var.lb_controller_values),
