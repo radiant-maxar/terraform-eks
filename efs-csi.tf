@@ -129,38 +129,61 @@ resource "aws_iam_role_policy_attachment" "eks_efs_csi_driver" {
 }
 
 resource "helm_release" "aws_efs_csi_driver" {
-  count            = var.efs_csi_driver ? 1 : 0
-  chart            = "aws-efs-csi-driver"
+  count            = var.efs_csi_driver && var.efs_csi_driver_helm ? 1 : 0
+  chart            = try(var.efs_csi_driver_options.chart, "aws-efs-csi-driver")
   create_namespace = var.efs_csi_driver_namespace == "kube-system" ? false : true
-  name             = "aws-efs-csi-driver"
+  max_history      = try(var.efs_csi_driver_options.max_history, 10)
+  name             = try(var.efs_csi_driver_options.name, "aws-efs-csi-driver")
   namespace        = var.efs_csi_driver_namespace
-  repository       = "https://kubernetes-sigs.github.io/aws-efs-csi-driver"
+  repository       = try(var.efs_csi_driver_options.repository, "https://kubernetes-sigs.github.io/aws-efs-csi-driver")
+  timeout          = try(var.efs_csi_driver_options.timeout, 600)
   version          = var.efs_csi_driver_version
   wait             = var.efs_csi_driver_wait
+
+  atomic                     = try(var.efs_csi_driver_options.atomic, null)
+  cleanup_on_fail            = try(var.efs_csi_driver_options.cleanup_on_fail, null)
+  dependency_update          = try(var.efs_csi_driver_options.dependency_update, null)
+  devel                      = try(var.efs_csi_driver_options.devel, null)
+  disable_openapi_validation = try(var.efs_csi_driver_options.disable_openapi_validation, null)
+  disable_webhooks           = try(var.efs_csi_driver_options.disable_webhooks, null)
+  force_update               = try(var.efs_csi_driver_options.force_update, null)
+  lint                       = try(var.efs_csi_driver_options.lint, null)
+  recreate_pods              = try(var.efs_csi_driver_options.recreate_pods, null)
+  render_subchart_notes      = try(var.efs_csi_driver_options.render_subchart_notes, null)
+  replace                    = try(var.efs_csi_driver_options.replace, null)
+  repository_key_file        = try(var.efs_csi_driver_options.repository_key_file, null)
+  repository_cert_file       = try(var.efs_csi_driver_options.repository_cert_file, null)
+  repository_ca_file         = try(var.efs_csi_driver_options.repository_ca_file, null)
+  repository_username        = try(var.efs_csi_driver_options.repository_username, null)
+  repository_password        = try(var.efs_csi_driver_options.repository_password, null)
+  reset_values               = try(var.efs_csi_driver_options.reset_values, null)
+  reuse_values               = try(var.efs_csi_driver_options.reuse_values, null)
+  skip_crds                  = try(var.efs_csi_driver_options.skip_crds, null)
+  wait_for_jobs              = try(var.efs_csi_driver_options.wait_for_jobs, null)
 
   values = [
     yamlencode({
       controller = {
-        serviceAccount = {
-          annotations = {
-            "eks.amazonaws.com/role-arn" = module.eks_efs_csi_driver_irsa[0].iam_role_arn
-          }
-        }
         tags = local.tags_noname
-      }
-      image = {
-        repository = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
-      }
-      node = {
-        serviceAccount = {
-          annotations = {
-            "eks.amazonaws.com/role-arn" = module.eks_efs_csi_driver_irsa[0].iam_role_arn
-          }
-        }
       }
     }),
     yamlencode(var.efs_csi_driver_values),
   ]
+
+  set {
+    name  = "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.eks_efs_csi_driver_irsa[0].iam_role_arn
+  }
+
+  set {
+    name  = "image.repository"
+    value = "${var.csi_ecr_repository_id}.dkr.ecr.${local.aws_region}.amazonaws.com/eks/aws-efs-csi-driver"
+  }
+
+  set {
+    name  = "node.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.eks_efs_csi_driver_irsa[0].iam_role_arn
+  }
 
   depends_on = [
     module.eks_efs_csi_driver_irsa[0],

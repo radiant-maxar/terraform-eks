@@ -9,16 +9,6 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
   aws_partition  = data.aws_partition.current.partition
   aws_region     = data.aws_region.current.name
-  aws_auth_roles = concat(
-    [
-      for role in var.system_masters_roles : {
-        rolearn  = "arn:${local.aws_partition}:iam::${local.aws_account_id}:role/${role}"
-        username = "${role}:{{SessionName}}"
-        groups   = ["system:masters"]
-      }
-    ],
-    var.aws_auth_roles
-  )
   tags_noname = {
     for key, value in var.tags : key => value
     if key != "Name"
@@ -28,10 +18,15 @@ locals {
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.21.0"
+  version = "~> 20.8.4"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
+
+  # Cluster authentication settings.
+  access_entries                           = var.access_entries
+  authentication_mode                      = var.authentication_mode
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   cluster_addons = merge(
     var.ebs_csi_driver ? {
@@ -110,11 +105,6 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   cluster_endpoint_public_access          = var.cluster_endpoint_public_access
   cluster_endpoint_public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
-
-  # aws-auth configmap
-  aws_auth_node_iam_role_arns_non_windows = var.karpenter ? [module.karpenter[0].node_iam_role_arn] : []
-  aws_auth_roles                          = local.aws_auth_roles
-  manage_aws_auth_configmap               = true
 
   enable_irsa = true
   subnet_ids  = concat(var.public_subnets, var.private_subnets)

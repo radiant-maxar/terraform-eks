@@ -1,11 +1,17 @@
-variable "aws_auth_roles" {
-  description = "List of additional role maps to add to the aws-auth configmap, use with caution."
-  type        = list(any)
-  default     = []
+variable "access_entries" {
+  description = "Map of access entries to add to the cluster"
+  type        = any
+  default     = {}
+}
+
+variable "authentication_mode" {
+  description = "The authentication mode for the cluster. Valid values are `CONFIG_MAP`, `API` or `API_AND_CONFIG_MAP`"
+  type        = string
+  default     = "API"
 }
 
 variable "cert_manager" {
-  description = "Install the cert-manager Helm chart when set."
+  description = "Install cert-manager and configure IRSA for its use."
   type        = bool
   default     = false
 }
@@ -22,10 +28,22 @@ variable "cert_manager_best_practice_defaults" {
   default     = {}
 }
 
+variable "cert_manager_helm" {
+  description = "Use Helm to install cert-manager when set."
+  type        = bool
+  default     = true
+}
+
 variable "cert_manager_namespace" {
   default     = "cert-manager"
   description = "Namespace that cert-manager will use."
   type        = string
+}
+
+variable "cert_manager_options" {
+  description = "Options for the cert-manager Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "cert_manager_route53_zone_ids" {
@@ -139,6 +157,12 @@ variable "crossplane" {
   default     = false
 }
 
+variable "crossplane_helm" {
+  description = "Install Crossplane using Helm when set."
+  type        = bool
+  default     = true
+}
+
 variable "crossplane_irsa" {
   description = "Indicates whether to create an IRSA role for Crossplane."
   type        = bool
@@ -149,6 +173,12 @@ variable "crossplane_namespace" {
   default     = "crossplane-system"
   description = "Namespace that Crossplane will use."
   type        = string
+}
+
+variable "crossplane_options" {
+  description = "Options for the Crossplane Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "crossplane_policy_arns" {
@@ -176,7 +206,7 @@ variable "crossplane_wait" {
 }
 
 variable "crossplane_version" {
-  default     = "1.15.0"
+  default     = "1.15.1"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
@@ -250,10 +280,22 @@ variable "efs_csi_driver" {
   default     = true
 }
 
+variable "efs_csi_driver_helm" {
+  description = "Install EFS CSI storage driver using Helm when set."
+  type        = bool
+  default     = true
+}
+
 variable "efs_csi_driver_namespace" {
   default     = "kube-system"
   description = "Namespace that EFS CSI storage driver will use."
   type        = string
+}
+
+variable "efs_csi_driver_options" {
+  description = "Options for EFS CSI Driver Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "efs_csi_driver_values" {
@@ -309,6 +351,12 @@ variable "eks_pod_identity_agent_options" {
   default     = {}
 }
 
+variable "enable_cluster_creator_admin_permissions" {
+  description = "Indicates whether or not to add the cluster creator (the identity used by Terraform) as an administrator via access entry"
+  type        = bool
+  default     = false
+}
+
 variable "fargate_profiles" {
   description = "Map of Fargate Profile definitions to create."
   type        = any
@@ -345,10 +393,22 @@ variable "karpenter" {
   default     = false
 }
 
+variable "karpenter_helm" {
+  description = "Install Karpenter using Helm when set."
+  type        = bool
+  default     = true
+}
+
 variable "karpenter_namespace" {
   default     = "kube-system"
   description = "Namespace that Karpenter will use."
   type        = string
+}
+
+variable "karpenter_options" {
+  description = "Options for the Karpenter Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "karpenter_values" {
@@ -360,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "0.35.1"
+  default     = "0.35.2"
 }
 
 variable "karpenter_wait" {
@@ -454,7 +514,13 @@ variable "kubernetes_version" {
 }
 
 variable "lb_controller" {
-  description = "Install and configure the AWS Load Balancer Controller."
+  description = "Install and configure IRSA for the AWS Load Balancer Controller."
+  type        = bool
+  default     = true
+}
+
+variable "lb_controller_helm" {
+  description = "Use Helm to install the AWS Load Balancer Controller."
   type        = bool
   default     = true
 }
@@ -463,6 +529,12 @@ variable "lb_controller_namespace" {
   default     = "kube-system"
   description = "Namespace that AWS Load Balancer Controller will use."
   type        = string
+}
+
+variable "lb_controller_options" {
+  description = "Options for the AWS Load Balancer Controller Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "lb_controller_values" {
@@ -522,6 +594,12 @@ variable "nvidia_gpu_operator_namespace" {
   default     = "gpu-operator"
   description = "Namespace that NVIDIA GPU Operator will use."
   type        = string
+}
+
+variable "nvidia_gpu_operator_options" {
+  description = "Options for NVIDIA GPU Operator Helm chart."
+  type        = any
+  default     = {}
 }
 
 variable "nvidia_gpu_operator_values" {
