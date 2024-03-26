@@ -73,6 +73,16 @@ output "karpenter_iam_role_name" {
   value       = var.karpenter ? module.karpenter[0].iam_role_name : null
 }
 
+output "karpenter_instance_profile_arn" {
+  description = "Karpenter instance profile ARN"
+  value       = var.karpenter ? module.karpenter[0].instance_profile_arn : null
+}
+
+output "karpenter_instance_profile_name" {
+  description = "Karpenter instance profile name"
+  value       = var.karpenter ? module.karpenter[0].instance_profile_name : null
+}
+
 output "karpenter_node_iam_role_arn" {
   description = "The Amazon Resource Name (ARN) specifying the node IAM role"
   value       = var.karpenter ? module.karpenter[0].node_iam_role_arn : null
