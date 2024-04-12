@@ -199,16 +199,16 @@ variable "crossplane_values" {
   default     = {}
 }
 
+variable "crossplane_version" {
+  default     = "1.15.2"
+  description = "Version of Crossplane Helm chart to install."
+  type        = string
+}
+
 variable "crossplane_wait" {
   description = "Wait for the Crossplane Helm chart installation to complete."
   type        = bool
   default     = true
-}
-
-variable "crossplane_version" {
-  default     = "1.15.1"
-  description = "Version of Crossplane Helm chart to install."
-  type        = string
 }
 
 # The ECR repository is not the same for every region, in particular
