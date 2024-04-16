@@ -199,16 +199,16 @@ variable "crossplane_values" {
   default     = {}
 }
 
+variable "crossplane_version" {
+  default     = "1.15.2"
+  description = "Version of Crossplane Helm chart to install."
+  type        = string
+}
+
 variable "crossplane_wait" {
   description = "Wait for the Crossplane Helm chart installation to complete."
   type        = bool
   default     = true
-}
-
-variable "crossplane_version" {
-  default     = "1.15.1"
-  description = "Version of Crossplane Helm chart to install."
-  type        = string
 }
 
 # The ECR repository is not the same for every region, in particular
@@ -305,7 +305,7 @@ variable "efs_csi_driver_values" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.5.6"
+  default     = "2.5.7"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -420,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "0.35.2"
+  default     = "0.36.0"
 }
 
 variable "karpenter_wait" {

@@ -18,7 +18,7 @@ locals {
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.8.4"
+  version = "~> 20.8.5"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
@@ -93,6 +93,7 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   create_kms_key                    = var.kms_manage ? false : true
   enable_kms_key_rotation           = var.kms_key_enable_rotation
   kms_key_administrators            = var.kms_key_administrators
+  kms_key_aliases                   = var.kms_key_aliases
   kms_key_deletion_window_in_days   = var.kms_key_deletion_window_in_days
   kms_key_enable_default_policy     = var.kms_key_enable_default_policy
   kms_key_owners                    = var.kms_key_owners
