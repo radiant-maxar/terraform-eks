@@ -59,7 +59,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.14.4"
+  default     = "1.14.5"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -305,7 +305,7 @@ variable "efs_csi_driver_values" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "2.5.7"
+  default     = "3.0.3"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -420,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "0.36.0"
+  default     = "0.36.1"
 }
 
 variable "karpenter_wait" {
@@ -609,7 +609,7 @@ variable "nvidia_gpu_operator_values" {
 }
 
 variable "nvidia_gpu_operator_version" {
-  default     = "23.9.2"
+  default     = "24.3.0"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
 }
