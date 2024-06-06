@@ -59,7 +59,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.14.5"
+  default     = "1.15.0"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -200,7 +200,7 @@ variable "crossplane_values" {
 }
 
 variable "crossplane_version" {
-  default     = "1.15.2"
+  default     = "1.16.0"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
@@ -305,7 +305,7 @@ variable "efs_csi_driver_values" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "3.0.3"
+  default     = "3.0.4"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -420,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "0.36.1"
+  default     = "0.37.0"
 }
 
 variable "karpenter_wait" {
@@ -508,7 +508,7 @@ variable "kube_proxy_options" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.29"
+  default     = "1.30"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
