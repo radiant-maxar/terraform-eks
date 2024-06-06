@@ -1,7 +1,7 @@
 module "karpenter" {
   count   = var.karpenter ? 1 : 0
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "~> 20.8.5"
+  version = "~> 20.13.1"
 
   cluster_name                      = var.cluster_name
   enable_irsa                       = true
