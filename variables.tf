@@ -59,7 +59,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.15.0"
+  default     = "1.15.1"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -305,7 +305,7 @@ variable "efs_csi_driver_values" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "3.0.4"
+  default     = "3.0.6"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
