@@ -14,7 +14,7 @@ module "eks_s3_csi_driver_irsa" {
     main = {
       provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
-        "kube-system:mountpoint-s3-csi-controller-sa",
+        "kube-system:s3-csi-driver-sa",
       ]
     }
   }
