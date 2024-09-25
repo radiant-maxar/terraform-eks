@@ -420,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "0.37.0"
+  default     = "1.0.2"
 }
 
 variable "karpenter_wait" {
