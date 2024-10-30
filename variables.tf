@@ -59,7 +59,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.15.3"
+  default     = "1.16.1"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -420,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "1.0.2"
+  default     = "1.0.6"
 }
 
 variable "karpenter_wait" {
@@ -544,7 +544,7 @@ variable "lb_controller_values" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.8.3"
+  default     = "1.9.2"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
@@ -609,7 +609,7 @@ variable "nvidia_gpu_operator_values" {
 }
 
 variable "nvidia_gpu_operator_version" {
-  default     = "24.6.1"
+  default     = "24.6.2"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
 }
