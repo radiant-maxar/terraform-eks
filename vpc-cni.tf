@@ -2,7 +2,7 @@
 module "eks_vpc_cni_irsa" {
   count   = var.vpc_cni ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.44.1"
+  version = "~> 5.48.0"
 
   role_name = "${var.cluster_name}-vpc-cni-role"
 
