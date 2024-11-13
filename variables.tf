@@ -200,7 +200,7 @@ variable "crossplane_values" {
 }
 
 variable "crossplane_version" {
-  default     = "1.17.1"
+  default     = "1.18.0"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
@@ -420,7 +420,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "1.0.6"
+  default     = "1.0.8"
 }
 
 variable "karpenter_wait" {
@@ -544,7 +544,7 @@ variable "lb_controller_values" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.9.2"
+  default     = "1.10.0"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
@@ -609,7 +609,7 @@ variable "nvidia_gpu_operator_values" {
 }
 
 variable "nvidia_gpu_operator_version" {
-  default     = "24.6.2"
+  default     = "24.9.0"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
 }
