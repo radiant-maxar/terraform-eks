@@ -508,7 +508,7 @@ variable "kube_proxy_options" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.31"
+  default     = "1.32"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
