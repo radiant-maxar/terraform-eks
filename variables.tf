@@ -544,7 +544,7 @@ variable "lb_controller_values" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.10.0"
+  default     = "1.11.0"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
