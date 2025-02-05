@@ -200,7 +200,7 @@ variable "crossplane_values" {
 }
 
 variable "crossplane_version" {
-  default     = "1.18.0"
+  default     = "1.18.2"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
