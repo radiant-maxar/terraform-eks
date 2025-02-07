@@ -642,12 +642,6 @@ variable "snapshot_controller_options" {
   default     = {}
 }
 
-variable "system_masters_roles" {
-  default     = ["PowerUsers"]
-  description = "Roles from the AWS account allowed system:masters to the EKS cluster."
-  type        = list(string)
-}
-
 variable "s3_csi_driver" {
   description = "Install and configure the S3 CSI storage driver addon."
   type        = bool
