@@ -339,6 +339,18 @@ variable "eks_managed_node_groups" {
   default     = {}
 }
 
+variable "eks_node_monitoring_agent" {
+  description = "Indicates whether to install the eks-node-monitoring-agent cluster addon."
+  type        = bool
+  default     = true
+}
+
+variable "eks_node_monitoring_agent_options" {
+  description = "Custom options for the eks-node-monitoring-agent addon."
+  type        = any
+  default     = {}
+}
+
 variable "eks_pod_identity_agent" {
   description = "Indicates whether to install the eks-pod-identity-agent cluster addon."
   type        = bool
