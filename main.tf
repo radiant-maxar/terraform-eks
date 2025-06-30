@@ -28,6 +28,12 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
   authentication_mode                      = var.authentication_mode
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
+  # Install the EKS Node Monitoring agent addon for node replacement
+  resource "aws_eks_addon" "eks-node-monitoring-agent" {
+    cluster_name    = var.cluster_name
+    addon_name      = "eks-node-monitoring-agent"
+    }
+
   cluster_addons = merge(
     var.ebs_csi_driver ? {
       "aws-ebs-csi-driver" = merge(
