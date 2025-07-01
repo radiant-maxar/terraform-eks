@@ -59,7 +59,7 @@ variable "cert_manager_values" {
 }
 
 variable "cert_manager_version" {
-  default     = "1.17.0"
+  default     = "1.18.1"
   description = "Version of cert-manager to install."
   type        = string
 }
@@ -200,7 +200,7 @@ variable "crossplane_values" {
 }
 
 variable "crossplane_version" {
-  default     = "1.18.2"
+  default     = "1.20.0"
   description = "Version of Crossplane Helm chart to install."
   type        = string
 }
@@ -305,7 +305,7 @@ variable "efs_csi_driver_values" {
 }
 
 variable "efs_csi_driver_version" {
-  default     = "3.1.5"
+  default     = "3.1.9"
   description = "Version of the EFS CSI storage driver to install."
   type        = string
 }
@@ -335,6 +335,18 @@ variable "efs_storage_class_parameters" {
 
 variable "eks_managed_node_groups" {
   description = "Map of managed node groups for the EKS cluster."
+  type        = any
+  default     = {}
+}
+
+variable "eks_node_monitoring_agent" {
+  description = "Indicates whether to install the eks-node-monitoring-agent cluster addon."
+  type        = bool
+  default     = true
+}
+
+variable "eks_node_monitoring_agent_options" {
+  description = "Custom options for the eks-node-monitoring-agent addon."
   type        = any
   default     = {}
 }
@@ -420,7 +432,7 @@ variable "karpenter_values" {
 variable "karpenter_version" {
   description = "Version of Karpenter Helm chart to install on the EKS cluster."
   type        = string
-  default     = "1.2.1"
+  default     = "1.5.1"
 }
 
 variable "karpenter_wait" {
@@ -508,7 +520,7 @@ variable "kube_proxy_options" {
 }
 
 variable "kubernetes_version" {
-  default     = "1.32"
+  default     = "1.33"
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
 }
@@ -544,7 +556,7 @@ variable "lb_controller_values" {
 }
 
 variable "lb_controller_version" {
-  default     = "1.11.0"
+  default     = "1.13.3"
   description = "Version of the AWS Load Balancer Controller chart to install."
   type        = string
 }
@@ -609,7 +621,7 @@ variable "nvidia_gpu_operator_values" {
 }
 
 variable "nvidia_gpu_operator_version" {
-  default     = "24.9.2"
+  default     = "25.3.1"
   description = "Version of the NVIDIA GPU Operator Helm chart to install."
   type        = string
 }

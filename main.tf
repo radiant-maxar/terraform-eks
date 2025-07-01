@@ -18,7 +18,7 @@ locals {
 # EKS Cluster
 module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-no-public-cluster-access tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.33.1"
+  version = "~> 20.37.1"
 
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
@@ -54,6 +54,9 @@ module "eks" { # tfsec:ignore:aws-ec2-no-public-egress-sgr tfsec:ignore:aws-eks-
     } : {},
     var.coredns ? {
       coredns = merge(local.addon_defaults, var.coredns_options)
+    } : {},
+    var.eks_node_monitoring_agent ? {
+      "eks-node-monitoring-agent" = merge(local.addon_defaults, var.eks_node_monitoring_agent_options)
     } : {},
     var.eks_pod_identity_agent ? {
       "eks-pod-identity-agent" = merge(local.addon_defaults, var.eks_pod_identity_agent_options)
